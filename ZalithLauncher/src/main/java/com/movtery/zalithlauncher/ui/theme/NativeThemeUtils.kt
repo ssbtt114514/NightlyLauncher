@@ -24,6 +24,7 @@ import android.content.res.Configuration
 import android.graphics.drawable.RippleDrawable
 import android.os.Build
 import android.widget.Button
+import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.button.MaterialButton
@@ -230,6 +231,8 @@ fun MaterialAlertDialogBuilder.showThemed(): AlertDialog {
         dialog.window?.apply {
             background?.setTint(colors.surface)
         }
+        dialog.findViewById<TextView>(androidx.appcompat.R.id.alertTitle)?.setTextColor(colors.onSurface)
+        dialog.findViewById<TextView>(android.R.id.message)?.setTextColor(colors.onSurfaceVariant)
         dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.applyThemeColors(colors)
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.applyThemeColors(colors)
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.applyThemeColors(colors)
