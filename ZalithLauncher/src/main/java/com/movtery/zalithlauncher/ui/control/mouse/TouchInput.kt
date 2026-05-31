@@ -44,7 +44,6 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.platform.LocalViewConfiguration
 import com.movtery.zalithlauncher.setting.enums.MouseControlMode
 import com.movtery.zalithlauncher.ui.components.FocusableBox
 import kotlinx.coroutines.Job
@@ -105,7 +104,6 @@ fun TouchpadLayout(
     inputChange: Array<out Any> = arrayOf(Unit),
     requestFocusKey: Any? = null
 ) {
-    val viewConfig = LocalViewConfiguration.current
     val interactionSource = remember { MutableInteractionSource() }
 
     //确保 pointerInput 中总是调用到最新的回调，避免闭包捕获旧值
@@ -169,8 +167,7 @@ fun TouchpadLayout(
                                             //这样当第一根手指被标记为 moveOnly 后，第二根手指可以接管
                                             if (activePointer == null) {
                                                 activePointer = pointerId
-                                                dragStates[pointerId] =
-                                                    DragState(startPosition = change.position)
+                                                dragStates[pointerId] = DragState(startPosition = change.position)
                                             } else {
                                                 //如果已有活跃指针，仅处理滑动
                                                 moveOnlyPointers.add(pointerId)
@@ -195,14 +192,13 @@ fun TouchpadLayout(
                                                         if (currentLongPressTimeoutMillis > 0) {
                                                             currentLongPressTimeoutMillis
                                                         } else {
-                                                            viewConfig.longPressTimeoutMillis
+                                                            viewConfiguration.longPressTimeoutMillis
                                                         }
                                                     delay(timeout)
 
                                                     //检查是否仍在处理此指针且未开始拖动
                                                     if (activePointer == pointerId && dragStates[pointerId]?.isDragging != true) {
-                                                        dragStates[pointerId]?.longPressTriggered =
-                                                            true
+                                                        dragStates[pointerId]?.longPressTriggered = true
                                                         currentOnLongPress()
                                                     }
                                                 }
@@ -235,7 +231,7 @@ fun TouchpadLayout(
                                                             val distanceFromStart =
                                                                 (moveChange.position - dragState.startPosition).getDistance()
 
-                                                            if (distanceFromStart > viewConfig.touchSlop && !dragState.isDragging) {
+                                                            if (distanceFromStart > viewConfiguration.touchSlop && !dragState.isDragging) {
                                                                 //超出了滑动检测距离，说明是真的在进行滑动
                                                                 dragState.isDragging = true
                                                                 longPressJobs.remove(pointerId)
@@ -243,8 +239,7 @@ fun TouchpadLayout(
                                                             }
 
                                                             if (dragState.isDragging || dragState.longPressTriggered) {
-                                                                val delta =
-                                                                    moveChange.positionChange()
+                                                                val delta = moveChange.positionChange()
                                                                 currentOnPointerMove(delta, false)
                                                             }
                                                         } else {
@@ -257,14 +252,10 @@ fun TouchpadLayout(
                                                     MouseControlMode.CLICK -> {
                                                         if (!dragState.longPressTriggered) {
                                                             dragState.longPressTriggered = true
-                                                            longPressJobs.remove(pointerId)
-                                                                ?.cancel()
+                                                            longPressJobs.remove(pointerId)?.cancel()
                                                             currentOnLongPress()
                                                         }
-                                                        currentOnPointerMove(
-                                                            moveChange.position,
-                                                            false
-                                                        )
+                                                        currentOnPointerMove(moveChange.position, false)
                                                     }
                                                 }
                                             }
@@ -486,7 +477,7 @@ private fun Modifier.mouseEventModifier(
 
     pointerInteropFilter { event ->
         if (currentDisabled) {
-            return@pointerInteropFilter true
+            return@pointerInteropFilter false
         }
 
         val isMouse = event.isFromSource(InputDevice.SOURCE_MOUSE)
