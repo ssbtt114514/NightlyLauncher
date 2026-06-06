@@ -79,8 +79,10 @@ import com.movtery.zalithlauncher.game.download.assets.platform.PlatformDisplayL
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformFilterCode
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformSortField
 import com.movtery.zalithlauncher.game.download.assets.utils.ModTranslations
+import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.components.LittleTextLabel
 import com.movtery.zalithlauncher.ui.components.OwnOutlinedTextField
+import com.movtery.zalithlauncher.ui.screens.content.elements.backgroundGlass
 import com.movtery.zalithlauncher.ui.theme.cardColor
 import com.movtery.zalithlauncher.ui.theme.onCardColor
 import com.movtery.zalithlauncher.utils.animation.getAnimateTween
@@ -188,43 +190,10 @@ fun SearchFilter(
 
         if (enablePlatform) {
             item {
-                FilterListLayout(
+                PlatformListLayout(
                     modifier = Modifier.fillMaxWidth(),
-                    items = Platform.entries,
-                    selectionMode = FilterSelectionMode.Single,
-                    selectedItems = listOfNotNull(searchPlatform),
-                    onSelectionChange = { new ->
-                        new.first().takeIf { it != searchPlatform }?.let { value ->
-                            onPlatformChange(value)
-                        }
-                    },
-                    getItemLabel = { item ->
-                        item.displayName
-                    },
-                    selectedLabel = { item ->
-                        PlatformIdentifier(
-                            platform = item,
-                            shape = MaterialTheme.shapes.small
-                        )
-                    },
-                    itemLayout = { platform ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(14.dp),
-                                painter = painterResource(platform.getDrawable()),
-                                contentDescription = platform.displayName
-                            )
-                            Text(
-                                text = platform.displayName,
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-                    },
-                    title = stringResource(R.string.download_assets_filter_search_platform),
-                    cancelable = false
+                    searchPlatform = searchPlatform,
+                    onPlatformChange = onPlatformChange,
                 )
             }
         }
@@ -400,11 +369,20 @@ private fun <E> SuggestionsText(
 fun BaseFilterLayout(
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.large,
-    color: Color = cardColor(),
+    influencedByBackground: Boolean = true,
+    color: Color = cardColor(influencedByBackground),
     contentColor: Color = onCardColor(),
+    blur: Int = AllSettings.backgroundBlur.state,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
+    @Composable
+    fun Content() {
+        Column(
+            modifier = Modifier.backgroundGlass(blur, color, influencedByBackground)
+        ) { content() }
+    }
+
     if (onClick != null) {
         Surface(
             modifier = modifier,
@@ -412,16 +390,14 @@ fun BaseFilterLayout(
             color = color,
             contentColor = contentColor,
             onClick = onClick,
-            content = content
-        )
+        ) { Content() }
     } else {
         Surface(
             modifier = modifier,
             shape = shape,
             color = color,
             contentColor = contentColor,
-            content = content
-        )
+        ) { Content() }
     }
 }
 
@@ -429,7 +405,7 @@ fun BaseFilterLayout(
  * 列表过滤器UI
  */
 @Composable
-private fun <E> FilterListLayout(
+fun <E> FilterListLayout(
     title: String,
     items: List<E>,
     selectionMode: FilterSelectionMode,
@@ -518,6 +494,52 @@ private fun <E> FilterListLayout(
             }
         }
     }
+}
+
+@Composable
+fun PlatformListLayout(
+    searchPlatform: Platform,
+    onPlatformChange: (Platform) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FilterListLayout(
+        modifier = modifier,
+        items = Platform.entries,
+        selectionMode = FilterSelectionMode.Single,
+        selectedItems = listOfNotNull(searchPlatform),
+        onSelectionChange = { new ->
+            new.first().takeIf { it != searchPlatform }?.let { value ->
+                onPlatformChange(value)
+            }
+        },
+        getItemLabel = { item ->
+            item.displayName
+        },
+        selectedLabel = { item ->
+            PlatformIdentifier(
+                platform = item,
+                shape = MaterialTheme.shapes.small
+            )
+        },
+        itemLayout = { platform ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    modifier = Modifier.size(14.dp),
+                    painter = painterResource(platform.getDrawable()),
+                    contentDescription = platform.displayName
+                )
+                Text(
+                    text = platform.displayName,
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+        },
+        title = stringResource(R.string.download_assets_filter_search_platform),
+        cancelable = false
+    )
 }
 
 @Composable

@@ -112,10 +112,22 @@
     <string name="error_network_unreachable">網路無法使用</string>
     <string name="error_connection_failed">無法連線到伺服器</string>
     <string name="error_parse_failed">資料解析失敗</string>
-    <string name="error_unauthorized">（%s）未授權</string>
-    <string name="error_notfound">（%s）找不到資源</string>
     <string name="error_client_error">（%s）客戶端錯誤</string>
     <string name="error_unknown">未知錯誤：%s</string>
+
+    <string name="error_bad_request">(%s) 伺服器無法處理該請求</string>
+    <string name="error_unauthorized">(%s) 請檢查登入憑證並重試</string>
+    <string name="error_forbidden">(%s) 您沒有權限存取此資源</string>
+    <string name="error_notfound">(%s) 請求的資源不存在</string>
+    <string name="error_not_acceptable">(%s) 請求不可接受</string>
+    <string name="error_request_timeout">(%s) 伺服器等待請求超時</string>
+    <string name="error_conflict">(%s) 請求與目前資源狀態衝突</string>
+    <string name="error_gone">(%s) 請求的資源已不再可用</string>
+    <string name="error_too_many_requests">(%s) 請稍後重試</string>
+    <string name="error_internal_server_error">(%s) 伺服器遇到意外情況</string>
+    <string name="error_bad_gateway">(%s) 上游伺服器返回了無效回應</string>
+    <string name="error_service_unavailable">(%s) 伺服器暫時無法處理請求</string>
+    <string name="error_gateway_timeout">(%s) 伺服器未能及時收到回應</string>
     <!--  啟動頁面  -->
     <string name="splash_screen_unpack_desc">啟動器需要安裝這些內容，才能確保 Minecraft 能夠正常啟動。這些內容已包含在應用程式中，需要解壓縮後才能正常使用，點擊下方按鈕，開始解壓縮並更新這些內容。</string>
     <string name="splash_screen_installing">啟動器正在解壓縮這些內容，解壓縮完成後將自動進入主介面，請耐心等候。</string>
@@ -152,6 +164,7 @@
     <string name="download_category_resource_pack">資源包</string>
     <string name="download_category_saves">存檔</string>
     <string name="download_category_shaders">光影包</string>
+    <string name="download_category_by_id">搜尋ID</string>
     <string name="download_game_failed_to_get_versions">獲取版本失敗：%s，點擊重試。</string>
     <string name="download_game_type_release">正式版</string>
     <string name="download_game_type_snapshot">快照版</string>
@@ -365,6 +378,9 @@
     <string name="game_menu_option_hotbar_rule_custom">自訂</string>
     <string name="game_menu_option_hotbar_width">快捷列寬度</string>
     <string name="game_menu_option_hotbar_height">快捷列高度</string>
+    <string name="game_menu_option_hotbar_double_click">雙擊互換雙手物品</string>
+    <string name="game_menu_option_hotbar_long_click">長按丟棄已選擇的物品</string>
+    <string name="game_menu_option_hotbar_long_click_delay">長按快捷欄觸發延遲</string>
     <string name="game_menu_option_show_menu">開啟選單懸浮窗</string>
     <string name="game_menu_option_show_menu_hided">已關閉遊戲選單懸浮窗，您可以透過系統返回鍵呼叫遊戲選單</string>
     <string name="game_menu_option_controls_opacity">控制佈局不透明度</string>
@@ -383,6 +399,16 @@
     <string name="game_styles_joystick_hide_when_gamepad">使用手把時隱藏</string>
     <string name="game_styles_save_failed">儲存樣式失敗</string>
     <string name="game_saponsorship_finished_game">啟動器已成功執行遊戲 %s 次！如果您覺得好用，可以考慮贊助支持作者喔！qwq</string>
+    <string name="game_vulkan_check_title">Vulkan 檢測</string>
+    <string name="game_vulkan_check_text">檢查您的裝置是否支援使用 Vulkan 執行 Minecraft 26.2+，結果僅供參考</string>
+    <string name="game_vulkan_check_version">Vulkan 版本：%s</string>
+    <string name="game_vulkan_check_turnip">使用 Turnip：%s</string>
+    <string name="game_vulkan_check_extensions">依賴的擴充功能：</string>
+    <string name="game_vulkan_check_missing_extensions">缺少的擴充功能：</string>
+    <string name="game_vulkan_check_features">依賴的功能：</string>
+    <string name="game_vulkan_check_missing_features">缺少的功能：</string>
+    <string name="game_vulkan_check_unsupp">您的裝置不支援使用 Vulkan 執行 Minecraft 26.2+</string>
+    <string name="game_vulkan_check_supp">您的裝置可以使用 Vulkan 執行 Minecraft 26.2+</string>
     <!--  渲染器  -->
     <string name="renderer_version_support">MC 版本支援：</string>
     <string name="renderer_version_unsupported_warning">目前渲染器 %s 不支援此遊戲版本，繼續使用可能導致渲染錯誤或遊戲崩潰！您確定要忽略風險並繼續嗎？</string>
@@ -514,6 +540,8 @@
     <string name="cape_name_founder_s">創始人披風</string>
     <string name="cape_name_copper">銅披風</string>
     <string name="cape_name_zombie_horse">殭屍馬披風</string>
+    <string name="cape_name_builder">建造者披風</string>
+    <string name="cape_name_crafter">工匠披風</string>
     <!--  檔案管理  -->
     <string name="files_back_to_parent">返回上一層</string>
     <string name="files_create_dir">建立目錄</string>
@@ -745,6 +773,7 @@
     <string name="minecraft_download_failed_retried">在此之前，啟動器已嘗試重試一次，但仍有任務下載失敗</string>
     <string name="minecraft_download_failed_notfound">部分依賴檔案無法下載，如果多次嘗試仍失敗，可能是遊戲缺少必要的函式庫檔案，建議重新安裝遊戲。</string>
     <!--  設定  -->
+    <string name="settings_title_blur">模糊效果</string>
     <string name="settings_element_selected">目前選擇：%s</string>
     <string name="settings_label_ignore_if_blank">留白則忽略此設定</string>
     <string name="settings_tab_renderer">渲染設定</string>
@@ -1030,6 +1059,7 @@
     <string name="settings_launcher_background_opacity_summary">調整背景元素的不透明度，以獲得更好的視覺效果並避免與背景衝突</string>
     <string name="settings_launcher_background_video_volume_title">影片背景音量</string>
     <string name="settings_launcher_background_video_volume_summary">當背景內容為影片時，可以透過此選項調整音量</string>
+    <string name="settings_launcher_background_blur_summary">調整背景的模糊效果，此選項較為耗費效能</string>
     <string name="settings_launcher_festivals_effects_title">持續型節日彩蛋效果</string>
     <string name="settings_launcher_festivals_effects_summary">在特定時間期間顯示持續型彩蛋效果</string>
     <string name="settings_launcher_home_page_title">主頁</string>
@@ -1076,6 +1106,10 @@
     <string name="download_assets_install_progress_downloading">下載並安裝資源\n%1$s\n (%2$s / %3$s)</string>
     <string name="download_assets_install_progress_installing">安裝資源\n%s</string>
     <string name="download_assets_install_failed">安裝資源失敗!</string>
+    <string name="download_assets_id_holder">專案 ID</string>
+    <string name="download_assets_id_tip">根據專案 ID 快速取得對應專案</string>
+    <string name="download_assets_id_not_found">未找到該專案！</string>
+    <string name="download_assets_id_unsupported">不支援該專案！</string>
     <string name="control_keyboard_bind_title">綁定按鍵</string>
     <string name="control_keyboard_bind_summary">請在您的鍵盤上按下想要綁定的按鍵</string>
     <string name="control_manage_create_new">建立</string>

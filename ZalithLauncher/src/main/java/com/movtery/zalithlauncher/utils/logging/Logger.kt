@@ -20,9 +20,11 @@ package com.movtery.zalithlauncher.utils.logging
 
 import android.content.Context
 import android.util.Log
+import com.movtery.zalithlauncher.BuildKeys
 import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.utils.file.zipDirectory
+import com.movtery.zalithlauncher.utils.printLauncherInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -69,7 +71,20 @@ object Logger : CoroutineScope {
             //所以清理旧的日志的工作需要放到初始化阶段
             deleteOldLogs()
             setupLogWriter()
+
+            printLauncherInfo()
+
             processEvents()
+        }
+    }
+
+    private suspend fun printLauncherInfo() {
+        logWriter?.apply {
+            withContext(Dispatchers.IO) {
+                println("================ ${BuildKeys.LAUNCHER_IDENTIFIER} Log ================")
+                printLauncherInfo { println(it) }
+                println("====================================================")
+            }
         }
     }
 
@@ -151,13 +166,9 @@ object Logger : CoroutineScope {
 
     private fun formatMessage(message: LogMessage): String {
         val time = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(message.time)
-        val caller = message.caller?.let {
-            if (it.startsWith(PACKAGE_PREFIX)) "~${it.substring(PACKAGE_PREFIX.length)}" else it
-        } ?: "Unknown"
-
         return buildString {
             append("[$time] [")
-            append(caller)
+            append(message.tag)
             append("/")
             append(message.level.name)
             append("] ")
@@ -177,27 +188,27 @@ object Logger : CoroutineScope {
         }
     }
 
-    fun lError(msg: String, t: Throwable? = null) =
-        log(Level.ERROR, findCaller(), msg, t)
+    fun error(tag: String, msg: String, t: Throwable? = null) =
+        log(Level.ERROR, tag, msg, t)
 
-    fun lWarning(msg: String, t: Throwable? = null) =
-        log(Level.WARNING, findCaller(), msg, t)
+    fun warning(tag: String, msg: String, t: Throwable? = null) =
+        log(Level.WARNING, tag, msg, t)
 
-    fun lInfo(msg: String, t: Throwable? = null) =
-        log(Level.INFO, findCaller(), msg, t)
+    fun info(tag: String, msg: String, t: Throwable? = null) =
+        log(Level.INFO, tag, msg, t)
 
-    fun lDebug(msg: String, t: Throwable? = null) =
-        log(Level.DEBUG, findCaller(), msg, t)
+    fun debug(tag: String, msg: String, t: Throwable? = null) =
+        log(Level.DEBUG, tag, msg, t)
 
     /**
      * 输出日志
      */
-    fun log(level: Level, caller: String?, message: String, throwable: Throwable? = null) {
+    fun log(level: Level, tag: String, message: String, throwable: Throwable? = null) {
         if (!isInitialized.get()) return
 
         val logMessage = LogMessage(
             time = System.currentTimeMillis(),
-            caller = caller,
+            tag = tag,
             level = level,
             message = message,
             throwable = throwable
@@ -205,20 +216,6 @@ object Logger : CoroutineScope {
 
         launch {
             channel.send(logMessage)
-        }
-    }
-
-    /**
-     * 找到调用者
-     */
-    private fun findCaller(): String? {
-        return Throwable().stackTrace.firstOrNull { element ->
-            element.className != this::class.java.name &&
-                    !element.className.startsWith("kotlin.coroutines") &&
-                    !element.className.startsWith("kotlinx.coroutines")
-        }?.let {
-            val className = it.className.substringAfterLast('.')
-            "$className.${it.methodName}"
         }
     }
 

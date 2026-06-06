@@ -44,8 +44,10 @@ import com.movtery.zalithlauncher.context.COPY_LABEL_LINK
 import com.movtery.zalithlauncher.coroutine.Task
 import com.movtery.zalithlauncher.coroutine.TaskSystem
 import com.movtery.zalithlauncher.game.control.ControlManager
+import com.movtery.zalithlauncher.game.plugin.driver.DriverPluginManager
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.notification.NotificationManager
+import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.path.URL_SUPPORT
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.base.BaseAppCompatActivity
@@ -61,14 +63,17 @@ import com.movtery.zalithlauncher.ui.screens.main.crashlogs.LogShareMenuOperatio
 import com.movtery.zalithlauncher.ui.screens.main.crashlogs.ShareLinkOperation
 import com.movtery.zalithlauncher.ui.theme.ZalithLauncherTheme
 import com.movtery.zalithlauncher.ui.theme.feativals.FestivalEffects
+import com.movtery.zalithlauncher.ui.theme.showThemed
+import com.movtery.zalithlauncher.ui.vulkan_checker.VCOperation
+import com.movtery.zalithlauncher.ui.vulkan_checker.VulkanChecker
 import com.movtery.zalithlauncher.upgrade.TooFrequentOperationException
 import com.movtery.zalithlauncher.utils.compareLangTag
 import com.movtery.zalithlauncher.utils.copyText
+import com.movtery.zalithlauncher.utils.device.VulkanChecker
 import com.movtery.zalithlauncher.utils.festival.getTodayFestivals
 import com.movtery.zalithlauncher.utils.file.shareFile
 import com.movtery.zalithlauncher.utils.isChinese
-import com.movtery.zalithlauncher.utils.logging.Logger.lInfo
-import com.movtery.zalithlauncher.utils.logging.Logger.lWarning
+import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.openLink
 import com.movtery.zalithlauncher.utils.network.openLinkInternal
 import com.movtery.zalithlauncher.utils.string.getMessageOrToString
@@ -88,11 +93,15 @@ import com.movtery.zalithlauncher.viewmodel.ModpackImportOperation
 import com.movtery.zalithlauncher.viewmodel.ModpackImportViewModel
 import com.movtery.zalithlauncher.viewmodel.ModpackVersionNameOperation
 import com.movtery.zalithlauncher.viewmodel.ScreenBackStackViewModel
+import com.movtery.zalithlauncher.viewmodel.VulkanCheckerViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.Locale
+
+private const val TAG = "MainActivity"
 
 @AndroidEntryPoint
 class MainActivity : BaseAppCompatActivity() {
@@ -147,6 +156,11 @@ class MainActivity : BaseAppCompatActivity() {
     private val logsUploadViewModel: LogsUploadViewModel by viewModels()
 
     /**
+     * Vulkan检测状态 ViewModel
+     */
+    private val vulkanCheckerViewModel: VulkanCheckerViewModel by viewModels()
+
+    /**
      * 是否开启捕获按键模式
      */
     private var isCaptureKey = false
@@ -184,11 +198,11 @@ class MainActivity : BaseAppCompatActivity() {
             eventViewModel.events.collect { event ->
                 when (event) {
                     is EventViewModel.Event.Key.StartKeyCapture -> {
-                        lInfo("Start key capture!")
+                        Logger.info("CollectEvent", "Start key capture!")
                         isCaptureKey = true
                     }
                     is EventViewModel.Event.Key.StopKeyCapture -> {
-                        lInfo("Stop key capture!")
+                        Logger.info("CollectEvent", "Stop key capture!")
                         isCaptureKey = false
                     }
                     is EventViewModel.Event.OpenLink -> {
@@ -209,8 +223,8 @@ class MainActivity : BaseAppCompatActivity() {
                     is EventViewModel.Event.DownloadPlugins -> {
                         showDownloadPlugins(event.link)
                     }
-                    is EventViewModel.Event.Launch.Main -> {
-                        launchGameViewModel.tryLaunch()
+                    is EventViewModel.Event.Launch.Game -> {
+                        launchGameViewModel.tryLaunch(event.version)
                     }
                     is EventViewModel.Event.Launch.PlayServer -> {
                         launchGameViewModel.quickPlayServer(event.version, event.address)
@@ -241,6 +255,9 @@ class MainActivity : BaseAppCompatActivity() {
                     is EventViewModel.Event.HomePage.Event -> {
                         val event0 = event.event
                         handleHomePageEvent(event0.key, event0.data)
+                    }
+                    is EventViewModel.Event.VulkanCheck -> {
+                        checkVulkan()
                     }
                     else -> {
                         //忽略
@@ -294,6 +311,7 @@ class MainActivity : BaseAppCompatActivity() {
                         exitActivity = {
                             this@MainActivity.finish()
                         },
+                        waitForVulkanChecker = vulkanCheckerViewModel::waitForVulkanChecker,
                         submitError = {
                             errorViewModel.showError(it)
                         },
@@ -423,6 +441,21 @@ class MainActivity : BaseAppCompatActivity() {
                     },
                     onLinkClick = { eventViewModel.sendEvent(EventViewModel.Event.OpenLink(it)) }
                 )
+
+                val vcOperation by vulkanCheckerViewModel.vcOperation.collectAsStateWithLifecycle()
+                VulkanChecker(
+                    operation = vcOperation,
+                    onChange = {
+                        vulkanCheckerViewModel.changeOperation(it)
+                    },
+                    startCheck = {
+                        eventViewModel.sendEvent(EventViewModel.Event.VulkanCheck)
+                    },
+                    confirmResult = {
+                        vulkanCheckerViewModel.resumeCont()
+                        AllSettings.autoVulkanChecker.save(false)
+                    }
+                )
             }
         }
     }
@@ -430,6 +463,24 @@ class MainActivity : BaseAppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleImportIfNeeded(intent)
+    }
+
+    /**
+     * 检查设备 Vulkan 支持情况
+     */
+    private suspend fun checkVulkan() {
+        val driver = DriverPluginManager.getDriver()
+        val useTurnip = !(AllSettings.zinkPreferSystemDriver.getValue() || driver.isLauncher)
+
+        withContext(Dispatchers.Main) {
+            val result = if (useTurnip) {
+                val tempDir = File(PathManager.DIR_CACHE, "vulkan_temp")
+                VulkanChecker.checkCapabilities(null, driver.path, tempDir.absolutePath)
+            } else {
+                VulkanChecker.checkCapabilities(null, null, null)
+            }
+            vulkanCheckerViewModel.changeOperation(VCOperation.Result(result, useTurnip))
+        }
     }
 
     /**
@@ -484,7 +535,7 @@ class MainActivity : BaseAppCompatActivity() {
                                 this@MainActivity.openLink(trimmed)
                             }
                         } else {
-                            lWarning("Blocked unsafe URL from homepage event: $trimmed")
+                            Logger.warning("HomePage", "Blocked unsafe URL from homepage event: $trimmed")
                         }
                     }
                 }
@@ -499,7 +550,7 @@ class MainActivity : BaseAppCompatActivity() {
                                 parms[1].trim()
                             } else null
                         }.onFailure { e ->
-                            lWarning("Failed to parse quick join server parameters: $raw", e)
+                            Logger.warning("HomePage", "Failed to parse quick join server parameters: $raw", e)
                         }.getOrNull()
                     }
                     if (!serverIp.isNullOrEmpty()) {
@@ -507,7 +558,7 @@ class MainActivity : BaseAppCompatActivity() {
                         if (serverIp.none { it.code < 32 }) {
                             launchGameViewModel.tryPlayServer(serverIp)
                         } else {
-                            lWarning("Invalid server address from homepage event: $serverIp")
+                            Logger.warning("HomePage", "Invalid server address from homepage event: $serverIp")
                         }
                     } else {
                         launchGameViewModel.tryLaunch()
@@ -541,11 +592,11 @@ class MainActivity : BaseAppCompatActivity() {
                     }
                 }
                 else -> {
-                    lWarning("Unknown homepage event: key=$key, data=$data")
+                    Logger.warning("HomePage", "Unknown homepage event: key=$key, data=$data")
                 }
             }
         }.onFailure { e ->
-            lWarning("Failed to handle homepage event: key=$key, data=$data", e)
+            Logger.warning("HomePage", "Failed to handle homepage event: key=$key, data=$data", e)
         }
     }
 
@@ -592,7 +643,7 @@ class MainActivity : BaseAppCompatActivity() {
                 }
             }
 
-            builder.create().show()
+            builder.showThemed()
         }
     }
 
@@ -724,7 +775,7 @@ class MainActivity : BaseAppCompatActivity() {
     @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (isCaptureKey) {
-            lInfo("Capture key event: $event")
+            Logger.info(TAG, "Capture key event: $event")
             eventViewModel.sendEvent(EventViewModel.Event.Key.OnKeyDown(event))
             return true
         }

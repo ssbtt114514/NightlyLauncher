@@ -86,8 +86,10 @@ import com.movtery.zalithlauncher.game.download.assets.platform.PlatformFilterCo
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformSearchData
 import com.movtery.zalithlauncher.game.download.assets.utils.ModTranslations
 import com.movtery.zalithlauncher.game.download.assets.utils.getMcmodTitle
+import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.components.ScalingLabel
 import com.movtery.zalithlauncher.ui.components.SmallOutlinedEditField
+import com.movtery.zalithlauncher.ui.screens.content.elements.backgroundGlass
 import com.movtery.zalithlauncher.ui.theme.cardColor
 import com.movtery.zalithlauncher.ui.theme.onCardColor
 import com.movtery.zalithlauncher.utils.animation.getAnimateTween
@@ -231,8 +233,10 @@ private fun PageController(
     modifier: Modifier = Modifier,
     page: AssetsPage,
     shape: Shape = MaterialTheme.shapes.large,
-    color: Color = cardColor(),
+    influencedByBackground: Boolean = true,
+    color: Color = cardColor(influencedByBackground),
     contentColor: Color = onCardColor(),
+    blur: Int = AllSettings.backgroundBlur.state,
     onPreviousPage: () -> Unit,
     onNextPage: () -> Unit,
     onNavigatePage: (Int) -> Unit
@@ -309,7 +313,9 @@ private fun PageController(
         contentColor = contentColor
     ) {
         Row(
-            modifier = Modifier.padding(all = 4.dp),
+            modifier = Modifier
+                .backgroundGlass(blur, color, influencedByBackground)
+                .padding(all = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
@@ -385,7 +391,7 @@ private fun ResultList(
             val modloaders = remember(item) { item.platformModLoaders() }
             val categories = remember(item, classes) { item.platformCategories(classes) }
 
-            ResultItemLayout(
+            ResultProjectLayout(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
@@ -407,11 +413,12 @@ private fun ResultList(
 }
 
 @Composable
-private fun ResultItemLayout(
+fun ResultProjectLayout(
     modifier: Modifier = Modifier,
     platform: Platform,
     title: String,
     description: String,
+    classes: PlatformClasses? = null,
     iconUrl: String? = null,
     author: String? = null,
     downloads: Long = 0L,
@@ -419,8 +426,10 @@ private fun ResultItemLayout(
     modloaders: List<PlatformDisplayLabel>? = null,
     categories: List<PlatformFilterCode>? = null,
     shape: Shape = MaterialTheme.shapes.large,
-    color: Color = cardColor(),
+    influencedByBackground: Boolean = true,
+    color: Color = cardColor(influencedByBackground),
     contentColor: Color = onCardColor(),
+    blur: Int = AllSettings.backgroundBlur.state,
     onClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -439,6 +448,7 @@ private fun ResultItemLayout(
     ) {
         Row(
             modifier = Modifier
+                .backgroundGlass(blur, color, influencedByBackground)
                 .padding(all = 8.dp)
                 .height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -514,28 +524,40 @@ private fun ResultItemLayout(
                     }
                 }
 
-                //标签栏
                 Row(
-                    modifier = Modifier
-                        .basicMarquee(Int.MAX_VALUE)
-                        .alpha(0.7f),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    modloaders?.let {
-                        it.forEach { modloader ->
-                            Text(
-                                text = modloader.getDisplayName(),
-                                style = MaterialTheme.typography.labelSmall
-                            )
+                    //标签栏
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .basicMarquee(Int.MAX_VALUE)
+                            .alpha(0.7f),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        modloaders?.let {
+                            it.forEach { modloader ->
+                                Text(
+                                    text = modloader.getDisplayName(),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                        }
+                        categories?.let {
+                            it.forEach { category ->
+                                Text(
+                                    text = stringResource(category.getDisplayName()),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
                         }
                     }
-                    categories?.let {
-                        it.forEach { category ->
-                            Text(
-                                text = stringResource(category.getDisplayName()),
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        }
+
+                    //资源的类别
+                    if (classes != null) {
+                        ClassesIdentifier(classes = classes)
                     }
                 }
             }

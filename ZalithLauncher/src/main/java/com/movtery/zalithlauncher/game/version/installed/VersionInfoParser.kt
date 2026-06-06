@@ -23,9 +23,10 @@ import com.movtery.zalithlauncher.game.versioninfo.models.GameManifest
 import com.movtery.zalithlauncher.game.versioninfo.models.GameManifest.Library
 import com.movtery.zalithlauncher.utils.GSON
 import com.movtery.zalithlauncher.utils.file.child
-import com.movtery.zalithlauncher.utils.logging.Logger.lDebug
-import com.movtery.zalithlauncher.utils.logging.Logger.lWarning
+import com.movtery.zalithlauncher.utils.logging.Logger
 import java.io.File
+
+private const val TAG = "VersionInfoParser"
 
 /**
  * [Modified from PojavLauncher](https://github.com/PojavLauncherTeam/PojavLauncher/blob/a6f3fc0/app_pojavlauncher/src/main/java/net/kdt/pojavlaunch/Tools.java#L885-L979)
@@ -41,11 +42,7 @@ fun getGameManifest(
             val inherits = gameManifest0.inheritsFrom
             GSON.fromJson(File(version.getVersionsFolder()).child(inherits).child("${inherits}.json").readText(), GameManifest::class.java)
         }
-        insertSafety(
-            target = inheritsManifest,
-            from = gameManifest0,
-            "assetIndex", "assets", "id", "mainClass", "minecraftArguments", "releaseTime", "time", "type"
-        )
+        inheritFields(inheritsManifest, gameManifest0)
 
         // Go through the libraries, remove the ones overridden by the custom version
         val inheritLibraryList: MutableList<Library> = ArrayList(inheritsManifest.libraries)
@@ -58,7 +55,7 @@ fun getGameManifest(
                     inheritLibrary.name.substring(0, inheritLibrary.name.lastIndexOf(":"))
 
                 if (libName == inheritLibName) {
-                    lDebug(
+                    Logger.debug(TAG,
                         "Library " + libName + ": Replaced version " +
                                 libName.substring(libName.lastIndexOf(":") + 1) + " with " +
                                 inheritLibName.substring(inheritLibName.lastIndexOf(":") + 1)
@@ -127,26 +124,14 @@ fun getGameManifest(
     return gameManifest0
 }
 
-/**
- * [Modified from PojavLauncher](https://github.com/PojavLauncherTeam/PojavLauncher/blob/a6f3fc0/app_pojavlauncher/src/main/java/net/kdt/pojavlaunch/Tools.java#L982-L996)
- */
-// Prevent NullPointerException
-private fun insertSafety(
-    target: GameManifest,
-    from: GameManifest,
-    vararg keyArr: String
-) {
-    keyArr.forEach { key ->
-        var value: Any? = null
-        runCatching {
-            val fieldA = from.javaClass.getDeclaredField(key).apply { isAccessible = true }
-            value = fieldA.get(from)
-            if (((value is String) && (value as String).isNotEmpty()) || value != null) {
-                val fieldB = target.javaClass.getDeclaredField(key).apply { isAccessible = true }
-                fieldB.set(target, value)
-            }
-        }.onFailure {
-            lWarning("Unable to insert $key = $value", it)
-        }
-    }
+private fun String?.isValid(): Boolean = !this.isNullOrEmpty()
+private fun inheritFields(target: GameManifest, from: GameManifest) {
+    from.assetIndex?.let { target.assetIndex = it }
+    if (from.assets.isValid()) target.assets = from.assets
+    if (from.id.isValid()) target.id = from.id
+    if (from.mainClass.isValid()) target.mainClass = from.mainClass
+    if (from.minecraftArguments.isValid()) target.minecraftArguments = from.minecraftArguments
+    if (from.releaseTime.isValid()) target.releaseTime = from.releaseTime
+    if (from.time.isValid()) target.time = from.time
+    if (from.type.isValid()) target.type = from.type
 }
