@@ -144,6 +144,7 @@ import com.movtery.zalithlauncher.ui.components.SimpleAlertDialog
 import com.movtery.zalithlauncher.ui.components.SimpleListDialog
 import com.movtery.zalithlauncher.ui.components.SingleLineTextCheck
 import com.movtery.zalithlauncher.ui.components.fadeEdge
+import com.movtery.zalithlauncher.ui.components.verticalScrollWithBar
 import com.movtery.zalithlauncher.ui.screens.main.control_editor.InfoLayoutTextItem
 import com.movtery.zalithlauncher.ui.theme.cardColor
 import com.movtery.zalithlauncher.ui.theme.itemColor
@@ -765,7 +766,7 @@ fun LocalLoginDialog(
                         modifier = Modifier
                             .fadeEdge(state = scrollState)
                             .weight(1f, fill = false)
-                            .verticalScroll(state = scrollState)
+                            .verticalScrollWithBar(state = scrollState)
                             .fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -990,7 +991,7 @@ fun OtherServerLoginDialog(
                         modifier = Modifier
                             .fadeEdge(state = scrollState)
                             .weight(1f, fill = false)
-                            .verticalScroll(state = scrollState)
+                            .verticalScrollWithBar(state = scrollState)
                             .fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
