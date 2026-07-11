@@ -20,6 +20,7 @@ package com.movtery.zalithlauncher.game.plugin.renderer_v2
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.os.Bundle
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.plugin.ApkPlugin
 import com.movtery.zalithlauncher.game.plugin.ApkPluginManager
@@ -51,7 +52,7 @@ object RendererV2PluginManager : ApkPluginManager() {
         val metaData = info.metaData ?: return
 
         // 读取启动器配置资源
-        val configRes = metaData.getInt("fclPlugin_V2", -1).takeIf { it > 0 } ?: return
+        val configRes = metaData.getStringRes("fclPlugin_V2") ?: return
         val configString = context.getString(info, configRes) ?: return
 
         val pm = context.packageManager
@@ -75,7 +76,9 @@ object RendererV2PluginManager : ApkPluginManager() {
                 packageName = packageName,
                 summary = context.getString(R.string.settings_renderer_from_plugins, appLabel),
                 renderer = config
-            )
+            ) { metaString ->
+                context.getMetaString(info, metaString)
+            }
         )
 
         // 已成功加载目标插件
@@ -89,8 +92,22 @@ object RendererV2PluginManager : ApkPluginManager() {
         }.getOrNull()?.let { loaded(it) }
     }
 
+    private fun Bundle.getStringRes(key: String): Int? {
+        return runCatching {
+            getInt(key, -1).takeIf { it > 0 }
+        }.getOrNull()
+    }
+
     private fun Context.getString(info: ApplicationInfo, path: Int): String? {
         return runCatching {
+            packageManager.getResourcesForApplication(info).getString(path)
+        }.getOrNull()
+    }
+
+    private fun Context.getMetaString(info: ApplicationInfo, key: String): String? {
+        return runCatching {
+            val metaData = info.metaData ?: return null
+            val path = metaData.getStringRes(key) ?: return null
             packageManager.getResourcesForApplication(info).getString(path)
         }.getOrNull()
     }
