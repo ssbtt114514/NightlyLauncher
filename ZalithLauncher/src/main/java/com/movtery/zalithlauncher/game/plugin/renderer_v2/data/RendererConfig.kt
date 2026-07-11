@@ -2,6 +2,7 @@ package com.movtery.zalithlauncher.game.plugin.renderer_v2.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.io.File
 
 /**
  * @param displayName               向用户展示的名称
@@ -84,5 +85,32 @@ data class RendererConfig(
     data class MetaString(
         @SerialName("key")
         val key: String
+    )
+}
+
+private fun String.resolveNativePath(nativeLibDir: String): String {
+    if (!startsWith("**|")) return this
+    return File(nativeLibDir, removePrefix("**|")).absolutePath
+}
+
+/**
+ * 将配置中所有以 `**|` 为前缀的路径替换为插件实际的 nativeLibraryDir 路径
+ */
+fun RendererConfig.resolveNativePaths(nativeLibDir: String): RendererConfig {
+    return copy(
+        rendererGLPath = rendererGLPath.resolveNativePath(nativeLibDir),
+        rendererEGLPath = rendererEGLPath.resolveNativePath(nativeLibDir),
+        dlopenLibPaths = dlopenLibPaths.map { it.resolveNativePath(nativeLibDir) },
+        env = env.map { env ->
+            when (env) {
+                is RendererConfig.Env.NormalEnv -> env.copy(value = env.value.resolveNativePath(nativeLibDir))
+                is RendererConfig.Env.EditableEnv -> env.copy(
+                    values = env.values.copy(
+                        defaultValue = env.values.defaultValue.resolveNativePath(nativeLibDir),
+                        values = env.values.values.map { it.resolveNativePath(nativeLibDir) }
+                    )
+                )
+            }
+        }
     )
 }

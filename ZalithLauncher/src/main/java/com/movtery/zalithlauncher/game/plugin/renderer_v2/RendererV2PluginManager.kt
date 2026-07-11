@@ -26,6 +26,7 @@ import com.movtery.zalithlauncher.game.plugin.ApkPlugin
 import com.movtery.zalithlauncher.game.plugin.ApkPluginManager
 import com.movtery.zalithlauncher.game.plugin.cacheAppIcon
 import com.movtery.zalithlauncher.game.plugin.renderer_v2.data.RendererConfig
+import com.movtery.zalithlauncher.game.plugin.renderer_v2.data.resolveNativePaths
 import com.movtery.zalithlauncher.path.GLOBAL_JSON
 import com.movtery.zalithlauncher.utils.logging.Logger
 
@@ -75,7 +76,7 @@ object RendererV2PluginManager : ApkPluginManager() {
             RendererV2Data(
                 packageName = packageName,
                 summary = context.getString(R.string.settings_renderer_from_plugins, appLabel),
-                renderer = config
+                renderer = config.resolveNativePaths(info.nativeLibraryDir)
             ) { metaString ->
                 context.getMetaString(info, metaString)
             }
