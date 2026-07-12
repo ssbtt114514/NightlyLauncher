@@ -48,20 +48,54 @@ data class RendererConfig(
         ): Env
 
         /**
-         * 可由启动器进行配置的环境变量
+         * 可根据预设值自由选择值的环境变量
          * @see EnvItems
          * @param title 该配置项的标题（meta-data 索引）
-         * @param values 该环境变量的配置项
+         * @param items 该环境变量的配置项
          */
         @Serializable
-        @SerialName("EditableEnv")
-        data class EditableEnv(
+        @SerialName("SelectableEnv")
+        data class SelectableEnv(
             @SerialName("key")
             val key: String,
             @SerialName("title")
             val title: MetaString? = null,
-            @SerialName("values")
-            val values: EnvItems
+            @SerialName("items")
+            val items: EnvItems
+        ): Env
+
+        /**
+         * 可由用户自行编辑值的环境变量
+         * @param title 该配置项的标题（meta-data 索引）
+         * @param defaultValue 默认值，留空或 null 时，启动器不会使用该环境变量
+         */
+        @Serializable
+        @SerialName("CustomizableEnv")
+        data class CustomizableEnv(
+            @SerialName("key")
+            val key: String,
+            @SerialName("title")
+            val title: MetaString? = null,
+            @SerialName("defaultValue")
+            val defaultValue: String? = null,
+        ): Env
+
+        /**
+         * 可开关的环境变量（使用/不使用）
+         * @param title 该配置项的标题（meta-data 索引）
+         * @param toggle 决定启动器是否使用该环境变量
+         */
+        @Serializable
+        @SerialName("ToggleableEnv")
+        data class ToggleableEnv(
+            @SerialName("key")
+            val key: String,
+            @SerialName("value")
+            val value: String,
+            @SerialName("title")
+            val title: MetaString? = null,
+            @SerialName("toggle")
+            val toggle: Boolean = true,
         ): Env
     }
 
@@ -94,22 +128,21 @@ private fun String.resolveNativePath(nativeLibDir: String): String {
 }
 
 /**
- * 将配置中所有以 `**|` 为前缀的路径替换为插件实际的 nativeLibraryDir 路径
+ * 将配置中以 `**|` 为前缀的路径替换为插件真实的 nativeLibraryDir 绝对路径
  */
 fun RendererConfig.resolveNativePaths(nativeLibDir: String): RendererConfig {
+    fun String.replacePath() = this.resolveNativePath(nativeLibDir)
+
     return copy(
-        rendererGLPath = rendererGLPath.resolveNativePath(nativeLibDir),
-        rendererEGLPath = rendererEGLPath.resolveNativePath(nativeLibDir),
-        dlopenLibPaths = dlopenLibPaths.map { it.resolveNativePath(nativeLibDir) },
+        rendererGLPath = rendererGLPath.replacePath(),
+        rendererEGLPath = rendererEGLPath.replacePath(),
+        dlopenLibPaths = dlopenLibPaths.map { it.replacePath() },
         env = env.map { env ->
             when (env) {
-                is RendererConfig.Env.NormalEnv -> env.copy(value = env.value.resolveNativePath(nativeLibDir))
-                is RendererConfig.Env.EditableEnv -> env.copy(
-                    values = env.values.copy(
-                        defaultValue = env.values.defaultValue.resolveNativePath(nativeLibDir),
-                        values = env.values.values.map { it.resolveNativePath(nativeLibDir) }
-                    )
-                )
+                is RendererConfig.Env.NormalEnv -> env.copy(value = env.value.replacePath())
+                is RendererConfig.Env.ToggleableEnv -> env.copy(value = env.value.replacePath())
+                // 其余类型都将值暴露给用户，不支持拼接路径！
+                else -> env
             }
         }
     )

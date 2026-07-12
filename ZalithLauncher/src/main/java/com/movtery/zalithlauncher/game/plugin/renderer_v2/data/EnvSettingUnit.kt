@@ -21,19 +21,13 @@ package com.movtery.zalithlauncher.game.plugin.renderer_v2.data
 import com.movtery.zalithlauncher.setting.unit.AbstractSettingUnit
 
 /**
- * 渲染器可配置环境变量的设置单元
- * @param mmkvKey MMKV 存储键，格式为 packageName:envKey
- * @param rawEnv 原始环境变量配置
- * @param defaultValue 默认环境变量值
- * @param values 该环境变量所有支持的配置
- * @param summary 该可配置环境变量的描述文本，由插件提供
+ * 渲染器可配置环境变量的设置单元（sealed）
+ * @param summary 该配置项的描述文本，由插件提供
  */
-class EnvSettingUnit(
+sealed class EnvSettingUnit(
     mmkvKey: String,
-    val rawEnv: RendererConfig.Env.EditableEnv,
     defaultValue: String,
-    val values: List<String>,
-    val summary: String? = null,
+    val summary: String?,
 ) : AbstractSettingUnit<String>(mmkvKey, defaultValue) {
 
     override fun getValue(): String {
@@ -44,5 +38,46 @@ class EnvSettingUnit(
     override fun saveValue(v: String): String {
         rendererEnvMMKV().putString(key, v).apply()
         return v
+    }
+
+    /**
+     * 选项式环境变量：从预设列表中选择一个值
+     * @param rawEnv 原始环境变量配置
+     * @param values 所有可选值（含默认值）
+     */
+    class Selectable(
+        mmkvKey: String,
+        val rawEnv: RendererConfig.Env.SelectableEnv,
+        defaultValue: String,
+        val values: List<String>,
+        summary: String? = null,
+    ) : EnvSettingUnit(mmkvKey, defaultValue, summary)
+
+    /**
+     * 自由填写式环境变量：用户可自行输入任意值
+     * @param rawEnv 原始环境变量配置
+     */
+    class Customizable(
+        mmkvKey: String,
+        val rawEnv: RendererConfig.Env.CustomizableEnv,
+        defaultValue: String,
+        summary: String? = null,
+    ) : EnvSettingUnit(mmkvKey, defaultValue, summary)
+
+    /**
+     * 开关式环境变量：启用/禁用该环境变量
+     * 启用时环境变量值为 [RendererConfig.Env.ToggleableEnv.value]，禁用时不设置
+     * @param rawEnv 原始环境变量配置
+     * @param envValue 该环境变量的实际值（toggle=true 时使用）
+     */
+    class Toggleable(
+        mmkvKey: String,
+        val rawEnv: RendererConfig.Env.ToggleableEnv,
+        defaultValue: String,
+        val envValue: String,
+        summary: String? = null,
+    ) : EnvSettingUnit(mmkvKey, defaultValue, summary) {
+        /** 当前开关是否启用 */
+        val isEnabled: Boolean get() = state.isNotEmpty()
     }
 }
