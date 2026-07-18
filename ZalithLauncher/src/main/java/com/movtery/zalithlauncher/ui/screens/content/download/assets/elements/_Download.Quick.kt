@@ -102,13 +102,33 @@ sealed interface QuickDownloadState {
         val targetVersion: PlatformVersion,
         val dependencies: List<Pair<PlatformProject, PlatformVersion>>
     ) : QuickDownloadState
+    /**
+     * 解析失败：主资源或某个前置依赖缺少对应的 MC 版本或加载器版本。
+     * [failures] 中每一项描述一个项目不符合兼容性的原因。
+     */
+    data class Failed(val failures: List<CompatibilityFailure>) : QuickDownloadState
     data class Error(val message: String) : QuickDownloadState
 }
+
+/**
+ * 某个项目与当前实例的兼容性失败原因
+ * @param projectTitle 项目标题
+ * @param platform 所属平台
+ * @param projectId 项目ID
+ * @param reason 失败原因（已本地化的字符串）
+ */
+data class CompatibilityFailure(
+    val projectTitle: String,
+    val platform: Platform,
+    val projectId: String,
+    val reason: String
+)
 
 private class QuickDownloadViewModel(
     private val platform: Platform,
     private val projectId: String,
-    private val classes: PlatformClasses
+    private val classes: PlatformClasses,
+    private val reasonProvider: FailureReasonProvider
 ) : ViewModel() {
     var state by mutableStateOf<QuickDownloadState>(QuickDownloadState.Loading)
         private set
@@ -135,89 +155,152 @@ private class QuickDownloadViewModel(
             val modLoader = gameVersion.getVersionInfo()?.loaderInfo?.loader?.displayName ?: ""
 
             try {
-                val result = resolveDependencies(platform, projectId, mcVersion, modLoader)
-                val targetProject = result.first
-                val targetVersion = result.second
-                val deps = result.third
+                val failures = mutableListOf<CompatibilityFailure>()
+                val deps = mutableListOf<Pair<PlatformProject, PlatformVersion>>()
+                val semaphore = Semaphore(8)
+                val processedLock = Any()
 
-                state = QuickDownloadState.Ready(targetProject, targetVersion, deps)
+                /**
+                 * 检查单个项目的兼容性，返回选中版本；不兼容时返回 null 并向 [failuresOut] 追加一条原因。
+                 */
+                suspend fun processProject(
+                    currentPlatform: Platform,
+                    currentProjectId: String,
+                    failuresOut: MutableList<CompatibilityFailure>
+                ): Pair<PlatformProject, PlatformVersion>? {
+                    val project = getProjectByVersion(currentProjectId, currentPlatform)
+                    val projectTitle = project.platformTitle()
+
+                    // 先获取并初始化所有版本
+                    val allVersions = getVersions(currentProjectId, currentPlatform)
+                        .initAllGeneric(currentProjectId = currentProjectId)
+
+                    if (allVersions.isEmpty()) {
+                        failuresOut.add(
+                            CompatibilityFailure(
+                                projectTitle = projectTitle,
+                                platform = currentPlatform,
+                                projectId = currentProjectId,
+                                reason = reasonProvider.noVersions()
+                            )
+                        )
+                        return null
+                    }
+
+                    // 第一步：过滤出支持当前 MC 版本的版本
+                    val mcMatched = allVersions.filter { version ->
+                        version.platformGameVersion().any { mcVersion == it || mcVersion.startsWith(it) || it.startsWith(mcVersion) }
+                    }
+
+                    if (mcMatched.isEmpty()) {
+                        val supportedVersions = allVersions
+                            .flatMap { it.platformGameVersion().asIterable() }
+                            .toSet()
+                        failuresOut.add(
+                            CompatibilityFailure(
+                                projectTitle = projectTitle,
+                                platform = currentPlatform,
+                                projectId = currentProjectId,
+                                reason = reasonProvider.noMatchingMcVersion(mcVersion, supportedVersions)
+                            )
+                        )
+                        return null
+                    }
+
+                    // 第二步：在支持当前 MC 版本的基础上，过滤出支持当前加载器的版本
+                    val loaderMatched = mcMatched.filter { version ->
+                        val loaders = version.platformLoaders().map { it.getDisplayName() }
+                        loaders.isEmpty() || modLoader.isEmpty() || loaders.any { modLoader.contains(it) }
+                    }
+
+                    if (loaderMatched.isEmpty()) {
+                        val supportedLoaders = mcMatched
+                            .flatMap { it.platformLoaders().map { l -> l.getDisplayName() } }
+                            .toSet()
+                        failuresOut.add(
+                            CompatibilityFailure(
+                                projectTitle = projectTitle,
+                                platform = currentPlatform,
+                                projectId = currentProjectId,
+                                reason = reasonProvider.noMatchingLoader(modLoader, supportedLoaders)
+                            )
+                        )
+                        return null
+                    }
+
+                    // initAllGeneric 已按发布日期降序排序，取第一个即为最新版本
+                    val latestVersion = loaderMatched.first()
+
+                    // 递归处理必需依赖
+                    val requiredDeps = latestVersion.platformDependencies()
+                        .filter { it.type == PlatformDependencyType.REQUIRED && it.projectId.isNotEmpty() }
+
+                    if (requiredDeps.isNotEmpty()) {
+                        val depResults = coroutineScope {
+                            requiredDeps.map { dep ->
+                                async {
+                                    semaphore.withPermit {
+                                        val alreadyProcessed = synchronized(processedLock) {
+                                            dep.projectId in processedProjects
+                                        }
+                                        if (alreadyProcessed) return@async null
+                                        synchronized(processedLock) {
+                                            processedProjects.add(dep.projectId)
+                                        }
+                                        runCatching {
+                                            processProject(dep.platform, dep.projectId, failuresOut)
+                                        }.getOrNull()
+                                    }
+                                }
+                            }.awaitAll().filterNotNull()
+                        }
+
+                        synchronized(deps) {
+                            deps.addAll(depResults)
+                        }
+                    }
+
+                    return project to latestVersion
+                }
+
+                processedProjects.add(projectId)
+                val targetResult = processProject(platform, projectId, failures)
+
+                if (targetResult == null) {
+                    // 主资源不兼容，直接返回失败
+                    state = QuickDownloadState.Failed(failures)
+                } else if (failures.isNotEmpty()) {
+                    // 某个前置依赖不兼容
+                    state = QuickDownloadState.Failed(failures)
+                } else {
+                    // 全部兼容
+                    state = QuickDownloadState.Ready(targetResult.first, targetResult.second, deps)
+                }
             } catch (e: Exception) {
                 state = QuickDownloadState.Error(e.message ?: "Download failed")
             }
         }
     }
 
-    private suspend fun resolveDependencies(
-        platform: Platform,
-        projectId: String,
-        mcVersion: String,
-        modLoader: String
-    ): Triple<PlatformProject, PlatformVersion, List<Pair<PlatformProject, PlatformVersion>>> {
-        val deps = mutableListOf<Pair<PlatformProject, PlatformVersion>>()
-        val semaphore = Semaphore(8)
-        val processedLock = Any()
-
-        fun isVersionCompatible(version: PlatformVersion): Boolean {
-            val gameVersions = version.platformGameVersion()
-            val loaders = version.platformLoaders().map { it.getDisplayName() }
-
-            val gameVersionMatch = gameVersions.any { mcVersion.startsWith(it) || it.startsWith(mcVersion) }
-            val loaderMatch = loaders.isEmpty() || modLoader.isEmpty() || loaders.any { modLoader.contains(it) }
-
-            return gameVersionMatch && loaderMatch
-        }
-
-        suspend fun processProject(currentPlatform: Platform, currentProjectId: String): Pair<PlatformProject, PlatformVersion> {
-            val project = getProjectByVersion(currentProjectId, currentPlatform)
-
-            val versions = getVersions(currentProjectId, currentPlatform)
-                .filter { isVersionCompatible(it) }
-                .initAllGeneric(currentProjectId = currentProjectId)
-
-            if (versions.isEmpty()) {
-                error("No compatible version for project ${project.platformTitle()}")
-            }
-
-            //initAllGeneric 已按发布日期降序排序，取第一个即为最新版本
-            val latestVersion = versions.first()
-
-            val requiredDeps = latestVersion.platformDependencies()
-                .filter { it.type == PlatformDependencyType.REQUIRED && it.projectId.isNotEmpty() }
-
-            if (requiredDeps.isNotEmpty()) {
-                val depResults = coroutineScope {
-                    requiredDeps.map { dep ->
-                        async {
-                            semaphore.withPermit {
-                                val alreadyProcessed = synchronized(processedLock) {
-                                    dep.projectId in processedProjects
-                                }
-                                if (alreadyProcessed) return@async null
-                                synchronized(processedLock) {
-                                    processedProjects.add(dep.projectId)
-                                }
-                                runCatching {
-                                    processProject(dep.platform, dep.projectId)
-                                }.getOrNull()
-                            }
-                        }
-                    }.awaitAll().filterNotNull()
-                }
-
-                synchronized(deps) {
-                    deps.addAll(depResults)
-                }
-            }
-
-            return project to latestVersion
-        }
-
-        val result = processProject(platform, projectId)
-        return Triple(result.first, result.second, deps)
-    }
-
     override fun onCleared() {
         resolveJob?.cancel()
+    }
+}
+
+/**
+ * 提供失败原因的本地化文本
+ */
+class FailureReasonProvider(private val context: android.content.Context) {
+    fun noVersions(): String = context.getString(R.string.download_quick_download_no_versions)
+
+    fun noMatchingMcVersion(currentMc: String, supportedMc: Set<String>): String {
+        val supportedText = supportedMc.joinToString(", ")
+        return context.getString(R.string.download_quick_download_no_mc_version, currentMc, supportedText)
+    }
+
+    fun noMatchingLoader(currentLoader: String, supportedLoaders: Set<String>): String {
+        val supportedText = supportedLoaders.joinToString(", ")
+        return context.getString(R.string.download_quick_download_no_loader, currentLoader, supportedText)
     }
 }
 
@@ -229,10 +312,13 @@ fun QuickDownloadDialog(
     onDismiss: () -> Unit,
     onDownload: (QuickDownloadInfo) -> Unit
 ) {
+    val context = LocalContext.current
+    val reasonProvider = remember { FailureReasonProvider(context) }
+
     val viewModel = viewModel(
         key = "$platform|$projectId|$classes"
     ) {
-        QuickDownloadViewModel(platform, projectId, classes)
+        QuickDownloadViewModel(platform, projectId, classes, reasonProvider)
     }
 
     LaunchedEffect(Unit) {
@@ -288,6 +374,32 @@ fun QuickDownloadDialog(
                                 },
                                 onClick = onDismiss
                             )
+                        }
+
+                        is QuickDownloadState.Failed -> {
+                            Text(
+                                text = stringResource(R.string.download_quick_download_incompatible),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+
+                            val listState = rememberLazyListState()
+                            LazyColumn(
+                                modifier = Modifier.weight(1f, fill = false).fillMaxWidth().heightIn(max = 300.dp),
+                                contentPadding = PaddingValues(vertical = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                state = listState
+                            ) {
+                                items(state.failures) { failure ->
+                                    CompatibilityFailureItem(failure = failure)
+                                }
+                            }
+
+                            FilledTonalButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = onDismiss
+                            ) {
+                                MarqueeText(text = stringResource(R.string.generic_confirm))
+                            }
                         }
 
                         is QuickDownloadState.Error -> {
@@ -372,7 +484,6 @@ private fun QuickDownloadItem(
     version: PlatformVersion,
     isMain: Boolean
 ) {
-    val context = LocalContext.current
     val title = remember { project.platformTitle() }
     val summary = remember { project.platformSummary() }
     val iconUrl = remember { project.platformIconUrl() }
@@ -424,6 +535,32 @@ private fun QuickDownloadItem(
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun CompatibilityFailureItem(failure: CompatibilityFailure) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = failure.projectTitle,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = failure.reason,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }

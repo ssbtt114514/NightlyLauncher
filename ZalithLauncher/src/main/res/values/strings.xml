@@ -193,6 +193,10 @@
     <string name="download_quick_download_resolving">Resolving dependencies...</string>
     <string name="download_quick_download_list">Download List</string>
     <string name="download_quick_download_main">Main</string>
+    <string name="download_quick_download_incompatible">The following resources are incompatible with the current instance and cannot be downloaded</string>
+    <string name="download_quick_download_no_versions">This resource has no available versions</string>
+    <string name="download_quick_download_no_mc_version">Current instance version is %1$s, this resource only supports: %2$s</string>
+    <string name="download_quick_download_no_loader">Current instance loader is %1$s, this resource only supports: %2$s</string>
     <string name="download_game_failed_to_get_versions">Failed to get version: %s. Tap to retry.</string>
     <string name="download_game_type_release">Release</string>
     <string name="download_game_type_snapshot">Snapshot</string>

@@ -584,17 +584,19 @@ fun ResultProjectLayout(
             }
 
             classes?.let {
-                IconButton(
-                    modifier = Modifier.align(Alignment.CenterVertically),
-                    onClick = {
-                        onQuickDownload(platform, projectId, it)
+                if (it != PlatformClasses.MOD_PACK) {
+                    IconButton(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        onClick = {
+                            onQuickDownload(platform, projectId, it)
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_download_2_outlined),
+                            contentDescription = stringResource(R.string.download_quick_download),
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_download_2_outlined),
-                        contentDescription = stringResource(R.string.download_quick_download),
-                        modifier = Modifier.size(24.dp)
-                    )
                 }
             }
         }

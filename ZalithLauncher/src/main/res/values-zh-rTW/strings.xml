@@ -178,6 +178,10 @@
     <string name="download_quick_download_resolving">正在解析依賴...</string>
     <string name="download_quick_download_list">下載列表</string>
     <string name="download_quick_download_main">主資源</string>
+    <string name="download_quick_download_incompatible">以下資源與當前實例不相容，無法下載</string>
+    <string name="download_quick_download_no_versions">該資源沒有可用的版本</string>
+    <string name="download_quick_download_no_mc_version">當前實例版本為 %1$s，該資源僅支援：%2$s</string>
+    <string name="download_quick_download_no_loader">當前實例載入器為 %1$s，該資源僅支援：%2$s</string>
     <string name="download_game_failed_to_get_versions">獲取版本失敗：%s，點擊重試。</string>
     <string name="download_game_type_release">正式版</string>
     <string name="download_game_type_snapshot">快照版</string>
