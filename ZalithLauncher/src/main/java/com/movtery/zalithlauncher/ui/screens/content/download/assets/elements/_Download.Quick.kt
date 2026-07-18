@@ -74,6 +74,7 @@ import com.movtery.zalithlauncher.ui.theme.onCardColor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -182,22 +183,24 @@ private class QuickDownloadViewModel(
                 .filter { it.type == PlatformDependencyType.REQUIRED && it.projectId.isNotEmpty() }
 
             if (requiredDeps.isNotEmpty()) {
-                val depResults = requiredDeps.map { dep ->
-                    async {
-                        semaphore.withPermit {
-                            val alreadyProcessed = synchronized(processedLock) {
-                                dep.projectId in processedProjects
+                val depResults = coroutineScope {
+                    requiredDeps.map { dep ->
+                        async {
+                            semaphore.withPermit {
+                                val alreadyProcessed = synchronized(processedLock) {
+                                    dep.projectId in processedProjects
+                                }
+                                if (alreadyProcessed) return@async null
+                                synchronized(processedLock) {
+                                    processedProjects.add(dep.projectId)
+                                }
+                                runCatching {
+                                    processProject(dep.platform, dep.projectId)
+                                }.getOrNull()
                             }
-                            if (alreadyProcessed) return@async null
-                            synchronized(processedLock) {
-                                processedProjects.add(dep.projectId)
-                            }
-                            runCatching {
-                                processProject(dep.platform, dep.projectId)
-                            }.getOrNull()
                         }
-                    }
-                }.awaitAll().filterNotNull()
+                    }.awaitAll().filterNotNull()
+                }
 
                 synchronized(deps) {
                     deps.addAll(depResults)
