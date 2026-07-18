@@ -49,12 +49,15 @@ object FavoritesManager {
     /**
      * 判断某个资源是否已收藏。
      *
-     * @param type       资源类型
+     * 注意：只通过 [projectId] + [platform] 匹配，不依赖 [type]，
+     * 这样即使历史数据中类型识别错误，也能正确识别为已收藏。
+     *
+     * @param type       资源类型（保留参数以保持调用兼容，但不参与匹配）
      * @param projectId  资源 ID（游戏版本为版本 ID）
      * @param platform   平台名称（游戏版本为 null）
      */
     fun isFavorite(type: FavoriteType, projectId: String, platform: String?): Boolean {
-        return _state.value.any { it.type == type && it.projectId == projectId && it.platform == platform }
+        return _state.value.any { it.projectId == projectId && it.platform == platform }
     }
 
     /** 判断某个 [FavoriteItem] 是否已收藏 */
@@ -62,15 +65,28 @@ object FavoritesManager {
 
     /**
      * 切换收藏状态：未收藏则添加，已收藏则移除。
+     *
+     * 如果已存在相同 [projectId] + [platform] 的收藏：
+     * - 当 [item.type] 与已记录的类型相同，则取消收藏（移除）
+     * - 当 [item.type] 与已记录的类型不同，则更新为新的 [item]（修正历史数据类型错误）
      * @return 切换后是否处于收藏状态
      */
     fun toggle(item: FavoriteItem): Boolean {
         val current = _state.value.toMutableList()
         val existIndex = current.indexOfFirst { it.uniqueKey() == item.uniqueKey() }
         return if (existIndex >= 0) {
-            current.removeAt(existIndex)
-            persist(current)
-            false
+            val existing = current[existIndex]
+            if (existing.type == item.type) {
+                //类型相同，取消收藏
+                current.removeAt(existIndex)
+                persist(current)
+                false
+            } else {
+                //类型不同，更新为新的类型（修正历史数据）
+                current[existIndex] = item
+                persist(current)
+                true
+            }
         } else {
             current.add(0, item)
             persist(current)
@@ -90,10 +106,12 @@ object FavoritesManager {
 
     /**
      * 移除收藏，返回是否成功移除。
+     *
+     * 注意：只通过 [projectId] + [platform] 匹配，不依赖 [type]。
      */
     fun remove(type: FavoriteType, projectId: String, platform: String?): Boolean {
         val current = _state.value.toMutableList()
-        val removed = current.removeAll { it.type == type && it.projectId == projectId && it.platform == platform }
+        val removed = current.removeAll { it.projectId == projectId && it.platform == platform }
         if (removed) persist(current)
         return removed
     }

@@ -299,8 +299,12 @@ private fun FavoriteCard(
                     )
                     //平台
                     item.platform?.let { p ->
+                        //通过 Platform 枚举转换存储的名称为友好显示格式
+                        val displayName = remember(p) {
+                            Platform.entries.find { it.name == p || it.displayName == p }?.displayName ?: p
+                        }
                         Text(
-                            text = p,
+                            text = displayName,
                             style = MaterialTheme.typography.labelSmall,
                             modifier = Modifier.alpha(0.6f)
                         )

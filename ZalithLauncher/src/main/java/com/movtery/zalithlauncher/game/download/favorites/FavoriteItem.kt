@@ -58,7 +58,10 @@ data class FavoriteItem(
     @SerializedName("addTime") val addTime: Long = System.currentTimeMillis()
 ) {
     /**
-     * 唯一标识：类型 + 平台 + 项目 ID。
+     * 唯一标识：平台 + 项目 ID。
+     *
+     * 注意：不包含 [type]，这样当资源类型识别错误并重新收藏时，
+     * 新的收藏会覆盖旧记录，避免出现重复条目。
      */
-    fun uniqueKey(): String = "${type.name}|${platform ?: ""}|$projectId"
+    fun uniqueKey(): String = "${platform ?: ""}|$projectId"
 }

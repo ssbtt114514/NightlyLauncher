@@ -411,6 +411,7 @@ fun ResultProjectLayout(
     description: String,
     projectId: String = "",
     classes: PlatformClasses? = null,
+    favoriteType: FavoriteType = classes?.let { classesToFavoriteType(it) } ?: FavoriteType.MOD,
     iconUrl: String? = null,
     author: String? = null,
     downloads: Long = 0L,
@@ -522,7 +523,6 @@ fun ResultProjectLayout(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     //收藏按钮（位于目标平台 modloaders 左边）
-                    val favoriteType = classes?.let { classesToFavoriteType(it) } ?: FavoriteType.MOD
                     val isFav = FavoritesManager.isFavorite(favoriteType, projectId, platform.name)
                     val modLoaderNames = modloaders?.map { it.getDisplayName() } ?: emptyList()
                     val categoryNames = categories?.map { stringResource(it.getDisplayName()) } ?: emptyList()
@@ -531,7 +531,7 @@ fun ResultProjectLayout(
                         onToggleFavorite = {
                             val item = FavoriteItem(
                                 type = favoriteType,
-                                platform = platform.displayName,
+                                platform = platform.name,
                                 projectId = projectId,
                                 title = title,
                                 iconUrl = iconUrl,
