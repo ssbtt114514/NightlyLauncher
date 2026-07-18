@@ -32,10 +32,11 @@ import io.github.rosemoe.sora.text.ContentReference
 import io.github.rosemoe.sora.text.TextRange
 import io.github.rosemoe.sora.widget.SymbolPairMatch
 
-class MarkdownLanguage(
-    homePageExtra: Boolean
-) : Language {
-    private val analyzeManager = MarkdownAnalyzeManager(homePageExtra)
+/**
+ * 用于主页 HTML 文件编辑器的语法高亮语言
+ */
+class HtmlLanguage : Language {
+    private val analyzeManager = HtmlAnalyzeManager()
 
     override fun getAnalyzeManager(): AnalyzeManager = analyzeManager
 
@@ -63,7 +64,11 @@ class MarkdownLanguage(
 
     override fun getSymbolPairs(): SymbolPairMatch {
         return SymbolPairMatch.DefaultSymbolPairs().apply {
-            putPair('`', SymbolPairMatch.SymbolPair("`", "`"))
+            putPair('<', SymbolPairMatch.SymbolPair("<", ">"))
+            putPair('"', SymbolPairMatch.SymbolPair("\"", "\""))
+            putPair('\'', SymbolPairMatch.SymbolPair("'", "'"))
+            putPair('{', SymbolPairMatch.SymbolPair("{", "}"))
+            putPair('(', SymbolPairMatch.SymbolPair("(", ")"))
         }
     }
 

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>自定义主页使用指南</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --card-bg: #f5f5f5;
+            --text: #1a1a1a;
+            --text-secondary: #666666;
+            --accent: #6750a4;
+            --accent-text: #ffffff;
+            --border: #e0e0e0;
+            --code-bg: #f0f0f0;
+            --code-text: #c62828;
+        }
+        html.dark {
+            --bg: #1c1b1f;
+            --card-bg: #2b2930;
+            --text: #e6e1e5;
+            --text-secondary: #cac4d0;
+            --accent: #d0bcff;
+            --accent-text: #381e72;
+            --border: #49454f;
+            --code-bg: #211f26;
+            --code-text: #f6b3c8;
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, "Roboto", "Noto Sans CJK SC", sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            -webkit-text-size-adjust: 100%;
+        }
+        body {
+            padding: 16px;
+        }
+        h1 {
+            font-size: 24px;
+            margin: 8px 0 16px;
+            color: var(--accent);
+        }
+        h2 {
+            font-size: 19px;
+            margin: 24px 0 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border);
+        }
+        h3 {
+            font-size: 16px;
+            margin: 16px 0 6px;
+        }
+        p {
+            margin: 8px 0;
+        }
+        ul, ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+        li {
+            margin: 4px 0;
+        }
+        code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "JetBrains Mono", "Source Code Pro", monospace;
+            font-size: 13px;
+        }
+        pre {
+            background: var(--code-bg);
+            color: var(--text);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: "JetBrains Mono", "Source Code Pro", monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        button {
+            appearance: none;
+            -webkit-appearance: none;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            background: var(--accent);
+            color: var(--accent-text);
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        button:active {
+            opacity: 0.7;
+            transform: scale(0.98);
+        }
+        button.outlined {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+        button.text {
+            background: transparent;
+            color: var(--accent);
+            padding: 8px 12px;
+        }
+        .tip {
+            background: var(--card-bg);
+            border-left: 3px solid var(--accent);
+            padding: 8px 12px;
+            margin: 8px 0;
+            font-size: 13px;
+        }
+        .table-wrap {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <h1>自定义主页使用指南</h1>
+    <p>欢迎使用 Zalith Launcher 2 的自定义主页！现在主页使用 <strong>HTML + JavaScript + CSS</strong> 编写，你可以利用完整的 Web 技术栈来构建富交互的主页。</p>
+
+    <div class="tip">
+        主页文件位于启动器外部存储的 <code>home_page.html</code>，可使用相对路径引用同目录下的 <code>.js</code> / <code>.css</code> / 图片资源。
+    </div>
+
+    <h2>基本结构</h2>
+    <p>一份最简的主页 HTML：</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="zh"&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+    &lt;style&gt;
+        body { font-family: sans-serif; padding: 16px; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Hello Zalith!&lt;/h1&gt;
+    &lt;script src="main.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+    <h2>JavaScript 桥接</h2>
+    <p>启动器向 <code>window.ZalithLauncher</code> 注入了以下方法，供主页与原生层通信：</p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>方法</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>sendEvent(key, data?)</code></td>
+                    <td>向启动器发送事件，<code>key</code> 为事件名，<code>data</code> 为可选字符串参数</td>
+                </tr>
+                <tr>
+                    <td><code>isDarkTheme()</code></td>
+                    <td>返回当前是否为深色主题，便于 JS 主动判断主题</td>
+                </tr>
+                <tr>
+                    <td><code>getLanguage()</code></td>
+                    <td>返回当前语言标签（如 <code>zh</code>、<code>en</code>）</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tip">
+        建议在调用前做一次存在性检查：<code>if (window.ZalithLauncher) { ... }</code>，方便在普通浏览器中预览调试主页。
+    </div>
+
+    <h2>支持的事件</h2>
+    <p>下列事件可由 <code>ZalithLauncher.sendEvent(key, data)</code> 触发：</p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>key</th>
+                    <th>data</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>url</code></td>
+                    <td>完整的 http(s) 链接</td>
+                    <td>在系统浏览器中打开链接</td>
+                </tr>
+                <tr>
+                    <td><code>check_update</code></td>
+                    <td>—</td>
+                    <td>触发启动器检查更新</td>
+                </tr>
+                <tr>
+                    <td><code>launch_game</code></td>
+                    <td><code>server=地址</code>（可选）</td>
+                    <td>启动当前选中的游戏版本，可附带快速加入服务器</td>
+                </tr>
+                <tr>
+                    <td><code>copy</code></td>
+                    <td>待复制的文本</td>
+                    <td>将文本写入系统剪贴板</td>
+                </tr>
+                <tr>
+                    <td><code>refresh_page</code></td>
+                    <td>—</td>
+                    <td>刷新当前主页</td>
+                </tr>
+                <tr>
+                    <td><code>share_game_log</code></td>
+                    <td>—</td>
+                    <td>分享当前游戏版本的最新日志</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>示例按钮</h2>
+    <p>以下按钮会调用 JS 桥触发对应事件：</p>
+    <div class="actions">
+        <div class="row">
+            <button onclick="ZalithLauncher.sendEvent('url', 'https://www.bilibili.com/')">访问哔哩哔哩</button>
+            <button class="outlined" onclick="ZalithLauncher.sendEvent('check_update')">检查更新</button>
+        </div>
+        <div class="row">
+            <button onclick="ZalithLauncher.sendEvent('launch_game')">启动游戏</button>
+            <button class="outlined" onclick="ZalithLauncher.sendEvent('launch_game', 'server=play.example.com')">快速加入服务器</button>
+        </div>
+        <div class="row">
+            <button class="text" onclick="ZalithLauncher.sendEvent('copy', 'Hello Zalith Launcher 2!')">复制示例文本</button>
+            <button class="text" onclick="ZalithLauncher.sendEvent('refresh_page')">刷新主页</button>
+            <button class="text" onclick="ZalithLauncher.sendEvent('share_game_log')">分享游戏日志</button>
+        </div>
+    </div>
+
+    <h2>主题适配</h2>
+    <p>启动器会在页面加载完成时，根据当前主题在 <code>&lt;html&gt;</code> 上添加 <code>dark</code> 或 <code>light</code> 类。建议在 CSS 中通过 CSS 变量切换配色：</p>
+<pre><code>:root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+}
+html.dark {
+    --bg: #1c1b1f;
+    --text: #e6e1e5;
+}
+body {
+    background: var(--bg);
+    color: var(--text);
+}</code></pre>
+    <p>当用户切换主题时，启动器会运行时更新 <code>&lt;html&gt;</code> 上的类名，无需重新加载页面。</p>
+
+    <h2>外部资源</h2>
+    <p>主页 HTML 可通过相对路径引用同目录下的资源：</p>
+<pre><code>&lt;link rel="stylesheet" href="style.css"&gt;
+&lt;script src="main.js"&gt;&lt;/script&gt;
+&lt;img src="banner.png"&gt;</code></pre>
+    <p>也支持绝对 URL 引用网络资源（如 CDN 上的库），但请留意网络可用性与隐私风险。</p>
+
+    <div class="card">
+        <h3>从网络加载主页</h3>
+        <p>当主页类型为「从网络加载」时，启动器会定期拉取并缓存你填写的 URL 返回的 HTML。同样可以使用相对路径引用同目录下随缓存一起保存的资源。</p>
+    </div>
+
+    <div class="card">
+        <h3>安全提示</h3>
+        <p>自定义主页是第三方内容，启动器不对任何主页内容负责。请谨慎接受陌生来源的主页文件或主页 URL，避免执行可能涉及账号、隐私或财产风险的脚本。</p>
+    </div>
+</body>
+</html>

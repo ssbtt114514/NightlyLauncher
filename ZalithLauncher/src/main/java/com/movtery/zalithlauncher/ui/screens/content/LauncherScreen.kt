@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -75,22 +74,23 @@ import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.account.AccountsManager
 import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
+import com.movtery.zalithlauncher.setting.enums.isLauncherInDarkTheme
 import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.components.BackgroundCard
 import com.movtery.zalithlauncher.ui.components.MarqueeText
 import com.movtery.zalithlauncher.ui.components.ScalingActionButton
-import com.movtery.zalithlauncher.ui.components.defaultRichTextStyle
 import com.movtery.zalithlauncher.ui.screens.NestedNavKey
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
 import com.movtery.zalithlauncher.ui.screens.content.elements.AccountAvatar
 import com.movtery.zalithlauncher.ui.screens.content.elements.CommonVersionInfoLayout
 import com.movtery.zalithlauncher.ui.screens.content.elements.VersionIconImage
-import com.movtery.zalithlauncher.ui.screens.main.custom_home.MarkdownBlock
-import com.movtery.zalithlauncher.ui.screens.main.custom_home.customHomePage
+import com.movtery.zalithlauncher.ui.screens.main.custom_home.HomePageEvent
+import com.movtery.zalithlauncher.ui.screens.main.custom_home.HomePageWebView
 import com.movtery.zalithlauncher.utils.animation.swapAnimateDpAsState
 import com.movtery.zalithlauncher.viewmodel.HomePageState
 import com.movtery.zalithlauncher.viewmodel.LocalHomePageViewModel
 import com.movtery.zalithlauncher.viewmodel.ScreenBackStackViewModel
+import java.util.Locale
 
 @Composable
 fun LauncherScreen(
@@ -98,7 +98,7 @@ fun LauncherScreen(
     navigateToVersions: (Version) -> Unit,
     onLaunchGame: (Version?) -> Unit,
     onOpenLink: (String) -> Unit,
-    onHomePageEvent: (MarkdownBlock.Button.Event) -> Unit,
+    onHomePageEvent: (HomePageEvent) -> Unit,
 ) {
     BaseScreen(
         screenKey = NormalNavKey.LauncherMain,
@@ -157,7 +157,7 @@ fun LauncherScreen(
 @Composable
 private fun ContentMenu(
     isVisible: Boolean,
-    onHomePageEvent: (MarkdownBlock.Button.Event) -> Unit,
+    onHomePageEvent: (HomePageEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val yOffset by swapAnimateDpAsState(
@@ -167,41 +167,41 @@ private fun ContentMenu(
 
     val homePageViewModel = LocalHomePageViewModel.current
     val pageState by homePageViewModel.pageState.collectAsStateWithLifecycle()
-    val richTextStyle = defaultRichTextStyle()
+    val isDark = isLauncherInDarkTheme()
+    val language = Locale.getDefault().language
 
-    LazyColumn(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .offset { IntOffset(x = 0, y = yOffset.roundToPx()) },
-        contentPadding = PaddingValues(all = 12.dp)
+            .offset { IntOffset(x = 0, y = yOffset.roundToPx()) }
     ) {
         if (BuildConfig.DEBUG) {
-            item {
-                //debug版本关不掉的警告，防止有人把测试版当正式版用 XD
-                BackgroundCard(
-                    shape = MaterialTheme.shapes.extraLarge,
-                    modifier = Modifier.padding(bottom = 12.dp)
+            //debug版本关不掉的警告，防止有人把测试版当正式版用 XD
+            BackgroundCard(
+                shape = MaterialTheme.shapes.extraLarge,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.generic_warning),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = stringResource(R.string.launcher_version_debug_warning, BuildKeys.LAUNCHER_NAME),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Text(
-                            modifier = Modifier
-                                .alpha(0.8f)
-                                .align(Alignment.End),
-                            text = stringResource(R.string.launcher_version_debug_warning_cant_close),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
+                    Text(
+                        text = stringResource(R.string.generic_warning),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = stringResource(R.string.launcher_version_debug_warning, BuildKeys.LAUNCHER_NAME),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        modifier = Modifier
+                            .alpha(0.8f)
+                            .align(Alignment.End),
+                        text = stringResource(R.string.launcher_version_debug_warning_cant_close),
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         }
@@ -209,31 +209,29 @@ private fun ContentMenu(
         when (val state = pageState) {
             is HomePageState.Blank -> {}
             is HomePageState.Loading -> {
-                item(key = "homepage_loading_box") {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(all = 24.dp),
-                        contentAlignment = Alignment.Center
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            LoadingIndicator()
-                            Text(
-                                text = stringResource(R.string.settings_launcher_home_page_loading),
-                                style = MaterialTheme.typography.labelMedium,
-                            )
-                        }
+                        LoadingIndicator()
+                        Text(
+                            text = stringResource(R.string.settings_launcher_home_page_loading),
+                            style = MaterialTheme.typography.labelMedium,
+                        )
                     }
                 }
             }
             is HomePageState.None -> {
-                customHomePage(
-                    blocks = state.page,
-                    richTextStyle = richTextStyle,
-                    onEvent = onHomePageEvent
+                HomePageWebView(
+                    url = state.url,
+                    isDark = isDark,
+                    language = language,
+                    onEvent = onHomePageEvent,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }

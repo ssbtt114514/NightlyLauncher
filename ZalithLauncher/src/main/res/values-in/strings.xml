@@ -1192,7 +1192,7 @@
     <string name="settings_launcher_home_page_type_blank">Kosong</string>
     <string name="settings_launcher_home_page_type_local">Dari perangkat</string>
     <string name="settings_launcher_home_page_type_url">Dari URL</string>
-    <string name="settings_launcher_home_page_type_local_tip">Edit file beranda dari perangkat di launcher. Launcher menggunakan format Markdown yang diperluas untuk beranda. Setelah selesai, klik Muat ulang untuk memperbarui beranda.</string>
+    <string name="settings_launcher_home_page_type_local_tip">Edit file beranda dari perangkat di launcher. Launcher menggunakan HTML, JavaScript, dan CSS untuk beranda. Setelah selesai, klik Muat ulang untuk memperbarui beranda.</string>
     <string name="settings_launcher_home_page_type_local_gen_doc">Buat Dokumen</string>
     <string name="settings_launcher_home_page_type_local_gen_doc_exists">File beranda sudah ada. Yakin ingin menimpa dan membuat ulang beranda dokumentasi resmi?</string>
     <string name="settings_launcher_home_page_type_url_tip">Ambil file beranda launcher dari tautan yang ditentukan dan simpan di cache, lalu perbarui dan muat ulang beranda secara berkala</string>

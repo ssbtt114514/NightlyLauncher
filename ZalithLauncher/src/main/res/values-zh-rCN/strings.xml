@@ -1068,7 +1068,7 @@
     <string name="settings_launcher_home_page_type_blank">空白</string>
     <string name="settings_launcher_home_page_type_local">从本地加载</string>
     <string name="settings_launcher_home_page_type_url">从网络加载</string>
-    <string name="settings_launcher_home_page_type_local_tip">编辑启动器本地的主页文件，启动器使用经过扩展的 Markdown 语法描述主页，编辑完成后，点击刷新重载主页</string>
+    <string name="settings_launcher_home_page_type_local_tip">编辑启动器本地的主页文件，启动器使用 HTML、JavaScript 与 CSS 描述主页，编辑完成后，点击刷新重载主页</string>
     <string name="settings_launcher_home_page_type_local_gen_doc">生成官方主页文档</string>
     <string name="settings_launcher_home_page_type_local_gen_doc_exists">当前已存在主页文件，你确定要将已有的主页覆盖掉，并重新生成官方文档主页吗？</string>
     <string name="settings_launcher_home_page_type_url_tip">从指定的链接获取启动器主页文件并缓存，定时刷新重载主页</string>

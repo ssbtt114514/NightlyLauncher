@@ -26,7 +26,7 @@ import androidx.lifecycle.viewModelScope
 import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.ui.AndroidStringText
 import com.movtery.zalithlauncher.ui.control.input.TextInputMode
-import com.movtery.zalithlauncher.ui.screens.main.custom_home.MarkdownBlock
+import com.movtery.zalithlauncher.ui.screens.main.custom_home.HomePageEvent
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -118,7 +118,7 @@ class EventViewModel : ViewModel() {
             /** 生成文档主页 */
             data object GenDocPage: HomePage
             /** 主页触发的事件 */
-            data class Event(val event: MarkdownBlock.Button.Event): HomePage
+            data class Event(val event: HomePageEvent): HomePage
         }
         /** 设备 Vulkan 检查 */
         data object VulkanCheck: Event

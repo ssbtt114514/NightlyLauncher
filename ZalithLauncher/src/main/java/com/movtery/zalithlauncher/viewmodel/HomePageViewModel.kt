@@ -25,9 +25,6 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.halilibo.richtext.commonmark.CommonMarkdownParseOptions
-import com.halilibo.richtext.commonmark.CommonmarkAstNodeParser
-import com.halilibo.richtext.markdown.node.AstNode
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.context.copyAssetFile
 import com.movtery.zalithlauncher.path.PathManager
@@ -35,8 +32,6 @@ import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.setting.enums.HomePageType
 import com.movtery.zalithlauncher.ui.code_editor.EditorState
 import com.movtery.zalithlauncher.ui.components.SimpleAlertDialog
-import com.movtery.zalithlauncher.ui.screens.main.custom_home.MarkdownBlock
-import com.movtery.zalithlauncher.ui.screens.main.custom_home.parseMarkdownBlocks
 import com.movtery.zalithlauncher.utils.isInGreaterChina
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.fetchStringFromUrl
@@ -57,14 +52,14 @@ import java.util.concurrent.TimeUnit
 
 private const val TAG = "HomePageVM"
 
-class HomePageViewModel : ViewModel() {
-    private val nodeParser = CommonmarkAstNodeParser(
-        options = CommonMarkdownParseOptions.Default
-    )
-    private fun parseMarkdown(content: String): AstNode {
-        return nodeParser.parse(content)
-    }
+/**
+ * WebViewAssetLoader 使用的虚拟主机基址。
+ * 与 `_PlayerSkin` 中的方案一致，URL 形如：
+ * `https://appassets.androidplatform.net/<path>/...`
+ */
+private const val WEB_BASE = "https://appassets.androidplatform.net"
 
+class HomePageViewModel : ViewModel() {
     private val _pageState = MutableStateFlow<HomePageState>(HomePageState.Loading)
     /** 启动器主页状态 */
     val pageState = _pageState.asStateFlow()
@@ -97,39 +92,47 @@ class HomePageViewModel : ViewModel() {
                     _pageState.update { HomePageState.Blank }
                 }
                 HomePageType.FromLocal -> {
-                    val page = reloadPageFromLocal()
-                    _pageState.update { HomePageState.None(page) }
+                    val url = reloadPageFromLocal()
+                    if (url != null) {
+                        _pageState.update { HomePageState.None(url) }
+                    } else {
+                        _pageState.update { HomePageState.Blank }
+                    }
                 }
                 HomePageType.FromURL -> {
-                    val page = reloadPageFromURL(force)
-                    _pageState.update { HomePageState.None(page) }
+                    val url = reloadPageFromURL(force)
+                    if (url != null) {
+                        _pageState.update { HomePageState.None(url) }
+                    } else {
+                        _pageState.update { HomePageState.Blank }
+                    }
                 }
             }
             reloadJob = null
         }
     }
 
-    private val localPageFile: File get() = File(PathManager.DIR_FILES_EXTERNAL, "home_page.md")
+    private val localPageFile: File get() = File(PathManager.DIR_FILES_EXTERNAL, "home_page.html")
     /** 本地主页文件是否存在 */
     fun isLocalExists(): Boolean = localPageFile.exists()
 
     /**
-     * 从本地文件加载主页内容
+     * 本地主页的 WebView URL。
+     * 若本地文件不存在则返回 null。
      */
-    private suspend fun reloadPageFromLocal(): List<MarkdownBlock> {
+    private suspend fun reloadPageFromLocal(): String? {
         val file = localPageFile
         return if (file.exists() && file.isFile) {
             withContext(Dispatchers.IO) {
                 runCatching {
-                    val content = file.readText()
-                    parseMarkdownBlocks(content, ::parseMarkdown)
+                    "$WEB_BASE/local/home_page.html"
                 }.onFailure { e ->
                     if (e is CancellationException) return@onFailure
                     Logger.warning(TAG, "Failed to load the homepage from the local device!", e)
-                }.getOrDefault(emptyList())
+                }.getOrNull()
             }
         } else {
-            emptyList()
+            null
         }
     }
 
@@ -149,9 +152,9 @@ class HomePageViewModel : ViewModel() {
                 val isChinese = isInGreaterChina()
                 context.copyAssetFile(
                     fileName = if (isChinese) {
-                        "home_page/doc_page_zh.md"
+                        "home_page/doc_page_zh.html"
                     } else {
-                        "home_page/doc_page_en.md"
+                        "home_page/doc_page_en.html"
                     },
                     output = localPageFile,
                     overwrite = true //以防解压失败
@@ -223,16 +226,21 @@ class HomePageViewModel : ViewModel() {
     /**
      * 从网络地址加载启动器主页
      * @param force 是否强制重新缓存远端主页
+     * @return 主页 WebView URL，加载失败且有缓存时返回缓存 URL，否则返回 null
      */
     private suspend fun reloadPageFromURL(
         force: Boolean = false
-    ): List<MarkdownBlock> = withContext(Dispatchers.IO) {
+    ): String? = withContext(Dispatchers.IO) {
         val url = AllSettings.homePageURL.getValue()
-        if (url.isEmptyOrBlank()) return@withContext emptyList()
+        if (url.isEmptyOrBlank()) return@withContext null
 
         val url0 = url.trim()
         val localUuid = url0.toUuid().toString().replace("-", "")
-        val localFile = File(PathManager.DIR_CACHE_HOME_PAGE, localUuid)
+        val cacheDir = File(PathManager.DIR_CACHE_HOME_PAGE, localUuid).apply {
+            if (!exists()) mkdirs()
+        }
+        //主页 HTML 文件存放路径，与同目录下的资源（JS/CSS/图片）一起缓存
+        val localFile = File(cacheDir, "home_page.html")
 
         //使用特定的文件来记录缓存时间
         val timeFile = File(PathManager.DIR_CACHE_HOME_PAGE, "$localUuid.time")
@@ -243,9 +251,7 @@ class HomePageViewModel : ViewModel() {
                 val currentTime = System.currentTimeMillis()
                 if (currentTime - localTime <= TimeUnit.MINUTES.toMillis(30L)) {
                     //若时间未超过半小时，则不刷新缓存
-                    //直接读取文件
-                    val content = localFile.readText()
-                    return@withContext parseMarkdownBlocks(content, ::parseMarkdown)
+                    return@withContext "$WEB_BASE/cache/$localUuid/home_page.html"
                 }
             }
 
@@ -259,21 +265,16 @@ class HomePageViewModel : ViewModel() {
                 Logger.warning(TAG, "Failed to cache to local file!", e)
             }
 
-            parseMarkdownBlocks(content, ::parseMarkdown)
+            "$WEB_BASE/cache/$localUuid/home_page.html"
         }.getOrElse { e ->
             if (e is CancellationException) throw e
             Logger.warning(TAG, "Failed to retrieve the homepage from the network!", e)
 
             //如果远端加载失败，尝试回退到本地已有的缓存
             if (localFile.exists()) {
-                runCatching {
-                    val content = localFile.readText()
-                    parseMarkdownBlocks(content, ::parseMarkdown)
-                }.onFailure { e ->
-                    Logger.warning(TAG, "Failed to load the homepage from the cache!", e)
-                }.getOrDefault(emptyList())
+                "$WEB_BASE/cache/$localUuid/home_page.html"
             } else {
-                emptyList()
+                null
             }
         }
     }
@@ -299,8 +300,8 @@ class HomePageViewModel : ViewModel() {
 sealed interface HomePageState {
     /** 加载中 */
     data object Loading : HomePageState
-    /** 加载完成，展示主页 */
-    data class None(val page: List<MarkdownBlock>) : HomePageState
+    /** 加载完成，展示主页（[url] 为 WebViewAssetLoader 形式的 URL） */
+    data class None(val url: String) : HomePageState
     /** 空白主页 */
     data object Blank : HomePageState
 }

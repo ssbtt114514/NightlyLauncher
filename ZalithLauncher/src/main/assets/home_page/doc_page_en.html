@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Custom Homepage User Guide</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --card-bg: #f5f5f5;
+            --text: #1a1a1a;
+            --text-secondary: #666666;
+            --accent: #6750a4;
+            --accent-text: #ffffff;
+            --border: #e0e0e0;
+            --code-bg: #f0f0f0;
+            --code-text: #c62828;
+        }
+        html.dark {
+            --bg: #1c1b1f;
+            --card-bg: #2b2930;
+            --text: #e6e1e5;
+            --text-secondary: #cac4d0;
+            --accent: #d0bcff;
+            --accent-text: #381e72;
+            --border: #49454f;
+            --code-bg: #211f26;
+            --code-text: #f6b3c8;
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, "Roboto", sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            -webkit-text-size-adjust: 100%;
+        }
+        body {
+            padding: 16px;
+        }
+        h1 {
+            font-size: 24px;
+            margin: 8px 0 16px;
+            color: var(--accent);
+        }
+        h2 {
+            font-size: 19px;
+            margin: 24px 0 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border);
+        }
+        h3 {
+            font-size: 16px;
+            margin: 16px 0 6px;
+        }
+        p {
+            margin: 8px 0;
+        }
+        ul, ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+        li {
+            margin: 4px 0;
+        }
+        code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "JetBrains Mono", "Source Code Pro", monospace;
+            font-size: 13px;
+        }
+        pre {
+            background: var(--code-bg);
+            color: var(--text);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: "JetBrains Mono", "Source Code Pro", monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        button {
+            appearance: none;
+            -webkit-appearance: none;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            background: var(--accent);
+            color: var(--accent-text);
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        button:active {
+            opacity: 0.7;
+            transform: scale(0.98);
+        }
+        button.outlined {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+        button.text {
+            background: transparent;
+            color: var(--accent);
+            padding: 8px 12px;
+        }
+        .tip {
+            background: var(--card-bg);
+            border-left: 3px solid var(--accent);
+            padding: 8px 12px;
+            margin: 8px 0;
+            font-size: 13px;
+        }
+        .table-wrap {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <h1>Custom Homepage User Guide</h1>
+    <p>Welcome to Zalith Launcher 2's custom homepage! The homepage is now written with <strong>HTML + JavaScript + CSS</strong>, so you can use the full web stack to build rich interactive pages.</p>
+
+    <div class="tip">
+        The homepage file is stored at <code>home_page.html</code> in the launcher's external storage. You can reference <code>.js</code> / <code>.css</code> / image assets in the same directory via relative paths.
+    </div>
+
+    <h2>Basic Structure</h2>
+    <p>A minimal homepage HTML:</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+    &lt;style&gt;
+        body { font-family: sans-serif; padding: 16px; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Hello Zalith!&lt;/h1&gt;
+    &lt;script src="main.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+    <h2>JavaScript Bridge</h2>
+    <p>The launcher injects the following methods into <code>window.ZalithLauncher</code> for the homepage to communicate with the native layer:</p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>sendEvent(key, data?)</code></td>
+                    <td>Send an event to the launcher. <code>key</code> is the event name, <code>data</code> is an optional string argument.</td>
+                </tr>
+                <tr>
+                    <td><code>isDarkTheme()</code></td>
+                    <td>Returns whether the dark theme is currently active.</td>
+                </tr>
+                <tr>
+                    <td><code>getLanguage()</code></td>
+                    <td>Returns the current language tag (e.g. <code>zh</code>, <code>en</code>).</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tip">
+        It's recommended to guard the call with an existence check: <code>if (window.ZalithLauncher) { ... }</code>, so you can preview the homepage in a regular browser during development.
+    </div>
+
+    <h2>Supported Events</h2>
+    <p>The following events can be triggered via <code>ZalithLauncher.sendEvent(key, data)</code>:</p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>key</th>
+                    <th>data</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>url</code></td>
+                    <td>A full http(s) URL</td>
+                    <td>Open the URL in the system browser</td>
+                </tr>
+                <tr>
+                    <td><code>check_update</code></td>
+                    <td>—</td>
+                    <td>Trigger a launcher update check</td>
+                </tr>
+                <tr>
+                    <td><code>launch_game</code></td>
+                    <td><code>server=address</code> (optional)</td>
+                    <td>Launch the currently selected game version, optionally with a server to quick-join</td>
+                </tr>
+                <tr>
+                    <td><code>copy</code></td>
+                    <td>The text to copy</td>
+                    <td>Copy the given text to the system clipboard</td>
+                </tr>
+                <tr>
+                    <td><code>refresh_page</code></td>
+                    <td>—</td>
+                    <td>Refresh the current homepage</td>
+                </tr>
+                <tr>
+                    <td><code>share_game_log</code></td>
+                    <td>—</td>
+                    <td>Share the latest log of the current game version</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Example Buttons</h2>
+    <p>The buttons below call the JS bridge to trigger their respective events:</p>
+    <div class="actions">
+        <div class="row">
+            <button onclick="ZalithLauncher.sendEvent('url', 'https://github.com/')">Visit GitHub</button>
+            <button class="outlined" onclick="ZalithLauncher.sendEvent('check_update')">Check Update</button>
+        </div>
+        <div class="row">
+            <button onclick="ZalithLauncher.sendEvent('launch_game')">Launch Game</button>
+            <button class="outlined" onclick="ZalithLauncher.sendEvent('launch_game', 'server=play.example.com')">Quick Join Server</button>
+        </div>
+        <div class="row">
+            <button class="text" onclick="ZalithLauncher.sendEvent('copy', 'Hello Zalith Launcher 2!')">Copy Sample Text</button>
+            <button class="text" onclick="ZalithLauncher.sendEvent('refresh_page')">Refresh Page</button>
+            <button class="text" onclick="ZalithLauncher.sendEvent('share_game_log')">Share Game Log</button>
+        </div>
+    </div>
+
+    <h2>Theme Adaptation</h2>
+    <p>When the page finishes loading, the launcher adds a <code>dark</code> or <code>light</code> class to <code>&lt;html&gt;</code> based on the current theme. It's recommended to switch colors via CSS variables:</p>
+<pre><code>:root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+}
+html.dark {
+    --bg: #1c1b1f;
+    --text: #e6e1e5;
+}
+body {
+    background: var(--bg);
+    color: var(--text);
+}</code></pre>
+    <p>When the user switches theme, the launcher updates the class on <code>&lt;html&gt;</code> at runtime, without reloading the page.</p>
+
+    <h2>External Resources</h2>
+    <p>The homepage HTML can reference resources in the same directory via relative paths:</p>
+<pre><code>&lt;link rel="stylesheet" href="style.css"&gt;
+&lt;script src="main.js"&gt;&lt;/script&gt;
+&lt;img src="banner.png"&gt;</code></pre>
+    <p>Absolute URLs (e.g. libraries on a CDN) are also supported, but be aware of network availability and privacy risks.</p>
+
+    <div class="card">
+        <h3>Loading from URL</h3>
+        <p>When the homepage type is set to "Load from URL", the launcher periodically fetches and caches the HTML returned by your configured URL. Relative paths resolve to resources stored alongside the cached HTML.</p>
+    </div>
+
+    <div class="card">
+        <h3>Security Notice</h3>
+        <p>Custom homepages are third-party content; the launcher takes no responsibility for any homepage content. Be cautious when accepting homepage files or URLs from unfamiliar sources, and avoid running scripts that may compromise your account, privacy, or property.</p>
+    </div>
+</body>
+</html>

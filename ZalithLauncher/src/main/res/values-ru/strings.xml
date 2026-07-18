@@ -1196,7 +1196,7 @@
     <string name="settings_launcher_home_page_type_blank">Пустая</string>
     <string name="settings_launcher_home_page_type_local">Загружать из локального хранилища</string>
     <string name="settings_launcher_home_page_type_url">Загружать по URL</string>
-    <string name="settings_launcher_home_page_type_local_tip">Редактируйте локальный файл домашней страницы. Он использует расширенный синтаксис Markdown для её описания. После редактирования нажмите «Обновить», чтобы перезагрузить домашнюю страницу лаунчера.</string>
+    <string name="settings_launcher_home_page_type_local_tip">Редактируйте локальный файл домашней страницы. Он использует HTML, JavaScript и CSS для её описания. После редактирования нажмите «Обновить», чтобы перезагрузить домашнюю страницу лаунчера.</string>
     <string name="settings_launcher_home_page_type_local_gen_doc">Сгенерировать документ</string>
     <string name="settings_launcher_home_page_type_local_gen_doc_exists">Файл домашней страницы уже существует. Вы уверены, что хотите перезаписать существующую домашнюю страницу и повторно сгенерировать официальную документацию?</string>
     <string name="settings_launcher_home_page_type_url_tip">Загружает файл домашней страницы лаунчера по указанной ссылке, кэширует его, а затем периодически обновляет и перезагружает.</string>

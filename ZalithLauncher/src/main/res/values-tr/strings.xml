@@ -1192,7 +1192,7 @@
     <string name="settings_launcher_home_page_type_blank">Boş</string>
     <string name="settings_launcher_home_page_type_local">Yerelden Yükle</string>
     <string name="settings_launcher_home_page_type_url">URL\'den yükle</string>
-    <string name="settings_launcher_home_page_type_local_tip">Başlatıcının yerel ana sayfa dosyasını düzenleyin. Başlatıcı, ana sayfayı tanımlamak için genişletilmiş bir Markdown sözdizimi kullanır. Düzenlemeyi tamamladıktan sonra, ana sayfayı yeniden yüklemek için Yenile\'ye tıklayın.</string>
+    <string name="settings_launcher_home_page_type_local_tip">Başlatıcının yerel ana sayfa dosyasını düzenleyin. Başlatıcı, ana sayfayı tanımlamak için HTML, JavaScript ve CSS kullanır. Düzenlemeyi tamamladıktan sonra, ana sayfayı yeniden yüklemek için Yenile\'ye tıklayın.</string>
     <string name="settings_launcher_home_page_type_local_gen_doc">Belge Oluştur</string>
     <string name="settings_launcher_home_page_type_local_gen_doc_exists">Ana sayfa dosyası zaten mevcut. Mevcut ana sayfayı üzerine yazıp resmi dokümantasyon ana sayfasını yeniden oluşturmak istediğinizden emin misiniz?</string>
     <string name="settings_launcher_home_page_type_url_tip">Belirtilen bağlantıdan başlatıcı ana sayfa dosyasını alın ve önbelleğe alın, ardından ana sayfayı periyodik olarak yenileyin ve yeniden yükleyin.</string>

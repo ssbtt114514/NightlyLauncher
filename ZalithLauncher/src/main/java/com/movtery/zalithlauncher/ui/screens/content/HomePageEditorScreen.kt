@@ -29,7 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.movtery.zalithlauncher.setting.enums.isLauncherInDarkTheme
 import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.code_editor.SoraEditor
-import com.movtery.zalithlauncher.ui.code_editor.lang.MarkdownLanguage
+import com.movtery.zalithlauncher.ui.code_editor.lang.HtmlLanguage
 import com.movtery.zalithlauncher.ui.code_editor.scheme.SchemeIDEADark
 import com.movtery.zalithlauncher.ui.code_editor.scheme.SchemeIDEALight
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
@@ -58,7 +58,7 @@ fun HomePageEditorScreen(
             val scheme = remember(isDark) {
                 if (isDark) SchemeIDEADark() else SchemeIDEALight()
             }
-            val language = remember { MarkdownLanguage(true) }
+            val language = remember { HtmlLanguage() }
 
             SoraEditor(
                 state = editorState,

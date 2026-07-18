@@ -1210,7 +1210,7 @@
     <string name="settings_launcher_home_page_type_blank">Khoảng trắng</string>
     <string name="settings_launcher_home_page_type_local">Tải từ máy</string>
     <string name="settings_launcher_home_page_type_url">Tải từ URL</string>
-    <string name="settings_launcher_home_page_type_local_tip">Chỉnh sửa trang chủ của trình khởi chạy. Trình khởi chạy dùng cú pháp Markdown mở rộng để miêu tả trang chủ. Sau khi chỉnh sửa, bấm Làm mới để tải lại trang chủ</string>
+    <string name="settings_launcher_home_page_type_local_tip">Chỉnh sửa trang chủ của trình khởi chạy. Trình khởi chạy dùng HTML, JavaScript và CSS để miêu tả trang chủ. Sau khi chỉnh sửa, bấm Làm mới để tải lại trang chủ</string>
     <string name="settings_launcher_home_page_type_local_gen_doc">Tạo tài liệu</string>
     <string name="settings_launcher_home_page_type_local_gen_doc_exists">Một tệp trang chủ đã tồn tại. Bạn có chắc muốn ghi đè trang chủ đang tồn tại và tạo lại trang chủ chính thức không?</string>
     <string name="settings_launcher_home_page_type_url_tip">Tải tệp trang chủ launcher từ liên kết chỉ định và lưu vào bộ nhớ đệm, sau đó tự động làm mới và tải lại trang chủ định kỳ</string>
