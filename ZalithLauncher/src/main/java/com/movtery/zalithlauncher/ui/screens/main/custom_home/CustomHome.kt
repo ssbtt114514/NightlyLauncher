@@ -123,7 +123,7 @@ fun HomePageWebView(
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(context))
             .addPathHandler(
                 "/local/",
-                WebViewAssetLoader.InternalStoragePathHandler(context, PathManager.DIR_FILES_EXTERNAL)
+                WebViewAssetLoader.InternalStoragePathHandler(context, PathManager.DIR_HOME_PAGE)
             )
             .addPathHandler(
                 "/cache/",

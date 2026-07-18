@@ -112,7 +112,7 @@ class HomePageViewModel : ViewModel() {
         }
     }
 
-    private val localPageFile: File get() = File(PathManager.DIR_FILES_EXTERNAL, "home_page.html")
+    private val localPageFile: File get() = File(PathManager.DIR_HOME_PAGE, "home_page.html")
     /** 本地主页文件是否存在 */
     fun isLocalExists(): Boolean = localPageFile.exists()
 

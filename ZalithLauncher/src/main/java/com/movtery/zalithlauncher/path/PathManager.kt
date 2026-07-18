@@ -41,6 +41,7 @@ class PathManager {
         lateinit var DIR_COMPONENTS: File
         lateinit var DIR_MOUSE_POINTER: File
         lateinit var DIR_BACKGROUND: File
+        lateinit var DIR_HOME_PAGE: File
         lateinit var DIR_CACHE_GAME_DOWNLOADER: File
         lateinit var DIR_CACHE_MODPACK_DOWNLOADER: File
         lateinit var DIR_CACHE_MODPACK_EXPORTER: File
@@ -79,6 +80,7 @@ class PathManager {
             DIR_COMPONENTS = File(DIR_FILES_PRIVATE, "components")
             DIR_MOUSE_POINTER = File(DIR_FILES_PRIVATE, "mouse_pointer")
             DIR_BACKGROUND = File(DIR_FILES_PRIVATE, "background")
+            DIR_HOME_PAGE = File(DIR_FILES_PRIVATE, "home_page")
             DIR_CACHE_GAME_DOWNLOADER = File(DIR_CACHE, "temp_game")
             DIR_CACHE_MODPACK_DOWNLOADER = File(DIR_CACHE, "temp_modpack")
             DIR_CACHE_MODPACK_EXPORTER = File(DIR_CACHE, "temp_modpack_exporter")
@@ -112,6 +114,7 @@ class PathManager {
             DIR_COMPONENTS.mkdirs()
             DIR_MOUSE_POINTER.mkdirs()
             DIR_BACKGROUND.mkdirs()
+            DIR_HOME_PAGE.mkdirs()
             DIR_CACHE_GAME_DOWNLOADER.mkdirs()
             DIR_CACHE_MODPACK_DOWNLOADER.mkdirs()
             DIR_CACHE_MODPACK_EXPORTER.mkdirs()
