@@ -633,6 +633,11 @@ object AllSettings : SettingsRegistry() {
     val showSponsorship = boolSetting("showSponsorship", true)
 
     /**
+     * 是否已确认非官方版本提示
+     */
+    val confirmedUnofficialVersion = boolSetting("confirmedUnofficialVersion", false)
+
+    /**
      * 搜索模组的初始搜索平台
      */
     val searchModPlatform = enumSetting("searchModPlatform", Platform.MODRINTH)

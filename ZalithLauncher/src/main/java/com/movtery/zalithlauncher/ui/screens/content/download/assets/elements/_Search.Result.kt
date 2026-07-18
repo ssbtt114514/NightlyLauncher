@@ -388,6 +388,7 @@ private fun ResultList(
                 title = mcmod.getMcmodTitle(title, context),
                 description = description,
                 projectId = item.platformId(),
+                classes = classes,
                 iconUrl = iconUrl,
                 author = author,
                 downloads = downloads,
@@ -530,7 +531,7 @@ fun ResultProjectLayout(
                         onToggleFavorite = {
                             val item = FavoriteItem(
                                 type = favoriteType,
-                                platform = platform.name,
+                                platform = platform.displayName,
                                 projectId = projectId,
                                 title = title,
                                 iconUrl = iconUrl,

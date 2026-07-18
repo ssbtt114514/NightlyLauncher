@@ -185,6 +185,10 @@
     <string name="favorites_add">Add to Favorites</string>
     <string name="favorites_added">Added to Favorites</string>
     <string name="favorites_removed">Removed from Favorites</string>
+    <string name="unofficial_version_title">Unofficial Version</string>
+    <string name="unofficial_version_message">This is not an official version and may have issues. It is recommended to use the official version.</string>
+    <string name="unofficial_version_get_official">Get Official</string>
+    <string name="unofficial_version_continue">I understand, continue</string>
     <string name="download_game_failed_to_get_versions">Failed to get version: %s. Tap to retry.</string>
     <string name="download_game_type_release">Release</string>
     <string name="download_game_type_snapshot">Snapshot</string>

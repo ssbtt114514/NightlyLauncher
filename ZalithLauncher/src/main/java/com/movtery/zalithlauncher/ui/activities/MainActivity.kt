@@ -173,6 +173,7 @@ class MainActivity : BaseAppCompatActivity() {
      * 是否开启捕获按键模式
      */
     private var isCaptureKey = false
+    private var showUnofficialVersionWarning = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -366,6 +367,27 @@ class MainActivity : BaseAppCompatActivity() {
                             eventViewModel.sendEvent(
                                 EventViewModel.Event.OpenLink(URL_SUPPORT)
                             )
+                        }
+                    )
+                }
+
+                //非官方版本提示弹窗
+                if (showUnofficialVersionWarning) {
+                    SimpleAlertDialog(
+                        title = stringResource(R.string.unofficial_version_title),
+                        text = stringResource(R.string.unofficial_version_message),
+                        confirmText = stringResource(R.string.unofficial_version_get_official),
+                        dismissText = stringResource(R.string.unofficial_version_continue),
+                        dismissByDialog = false,
+                        onConfirm = {
+                            showUnofficialVersionWarning = false
+                            eventViewModel.sendEvent(
+                                EventViewModel.Event.OpenLink("https://www.zalithlauncher.cn/docs/projects/zl2")
+                            )
+                        },
+                        onDismiss = {
+                            showUnofficialVersionWarning = false
+                            //关闭弹窗，继续使用
                         }
                     )
                 }

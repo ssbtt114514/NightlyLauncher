@@ -185,6 +185,10 @@
     <string name="favorites_add">加入收藏</string>
     <string name="favorites_added">已加入收藏</string>
     <string name="favorites_removed">已取消收藏</string>
+    <string name="unofficial_version_title">非官方版本</string>
+    <string name="unofficial_version_message">该版本非官方版，可能存在问题，建议使用官方版本。</string>
+    <string name="unofficial_version_get_official">获取官方版</string>
+    <string name="unofficial_version_continue">我已知晓，继续使用</string>
     <string name="download_game_failed_to_get_versions">获取版本失败：%s，点击重试。</string>
     <string name="download_game_type_release">正式版</string>
     <string name="download_game_type_snapshot">快照版</string>

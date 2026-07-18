@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.download.assets.search
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -226,7 +227,7 @@ private fun FavoriteCard(
                     iconUrl = item.iconUrl
                 )
             } else if (item.type == FavoriteType.GAME_VERSION) {
-                //游戏版本用 emoji 占位（暂无图标资源）
+                //游戏版本用草方块图标
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
@@ -234,9 +235,10 @@ private fun FavoriteCard(
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "🎮",
-                        style = MaterialTheme.typography.headlineSmall
+                    Image(
+                        painter = painterResource(R.drawable.img_old_grass_block),
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp)
                     )
                 }
             }
