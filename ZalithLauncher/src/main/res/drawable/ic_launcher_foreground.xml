@@ -1,75 +1,28 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="512"
-    android:viewportHeight="512">
-  <!-- 背景：圆角矩形，使用 Nightly 深蓝紫 -->
-  <path
-      android:pathData="M112,0h288a112,112 0 0 1 112,112v288a112,112 0 0 1 -112,112h-288a112,112 0 0 1 -112,-112v-288a112,112 0 0 1 112,-112z"
-      android:fillColor="#1A0F2E"/>
+    android:viewportWidth="108"
+    android:viewportHeight="108">
 
-  <!-- 内部紫色光晕 -->
-  <path
-      android:pathData="M112,0h288a112,112 0 0 1 112,112v288a112,112 0 0 1 -112,112h-288a112,112 0 0 1 -112,-112v-288a112,112 0 0 1 112,-112z"
-      android:fillColor="#8B5CF6"
-      android:fillAlpha="0.18"/>
+    <!-- 月牙 -->
+    <path
+        android:fillColor="#8B5CF6"
+        android:pathData="M34,18 A30,30 0,1 0,72 48 A25,25 0,1 1,34 18 Z"/>
 
-  <!-- 内层轨道环 -->
-  <path
-      android:pathData="M256,120A140,140 0 1 0 256,400A140,140 0 1 0 256,120Z"
-      android:fillColor="#00000000"
-      android:strokeColor="#8B5CF6"
-      android:strokeWidth="3"
-      android:strokeAlpha="0.5"/>
+    <!-- N 字 (纯橙色) -->
+    <path
+        android:fillColor="#F97316"
+        android:pathData="M42,32 L58,32 L58,44 L68,32 L76,32 L63,48 L76,64 L68,64 L58,52 L58,64 L42,64 L42,52 L32,64 L24,64 L37,48 L24,32 L32,32 L42,44 L42,32 Z"/>
 
-  <!-- 外层轨道环 -->
-  <path
-      android:pathData="M256,90A170,170 0 1 0 256,430A170,170 0 1 0 256,90Z"
-      android:fillColor="#00000000"
-      android:strokeColor="#F97316"
-      android:strokeWidth="1.5"
-      android:strokeAlpha="0.3"/>
+    <!-- 右上角脉冲点外圈 (cx=80, cy=18, r=10) -->
+    <path
+        android:fillColor="#F97316"
+        android:fillAlpha="0.25"
+        android:pathData="M90,18 A10,10 0,1 1,70 18 A10,10 0,1 1,90 18 Z"/>
 
-  <!-- 月牙（Nightly 夜晚意象） -->
-  <path
-      android:pathData="M216,150A110,110 0 1 0 356,300A85,85 0 1 1 216,150Z"
-      android:fillColor="#8B5CF6"/>
+    <!-- 右上角脉冲点内核 (cx=80, cy=18, r=6) -->
+    <path
+        android:fillColor="#F97316"
+        android:pathData="M86,18 A6,6 0,1 1,74 18 A6,6 0,1 1,86 18 Z"/>
 
-  <!-- 中心 N 字（Nightly 首字母） -->
-  <path
-      android:pathData="M216,240h20v40l40,-40h20v110h-20v-40l-40,40h-20v-110z"
-      android:fillColor="#F97316"/>
-
-  <!-- 右上角脉冲点外圈 -->
-  <path
-      android:pathData="M356,100A20,20 0 1 0 356,140A20,20 0 1 0 356,100Z"
-      android:fillColor="#F97316"
-      android:fillAlpha="0.3"/>
-
-  <!-- 右上角脉冲点内核 -->
-  <path
-      android:pathData="M356,106A14,14 0 1 0 356,134A14,14 0 1 0 356,106Z"
-      android:fillColor="#F97316"/>
-
-  <!-- 散落星点 -->
-  <path
-      android:pathData="M106,160h8v8h-8z"
-      android:fillColor="#8B5CF6"
-      android:fillAlpha="0.6"/>
-  <path
-      android:pathData="M386,200h6v6h-6z"
-      android:fillColor="#06B6D4"
-      android:fillAlpha="0.5"/>
-  <path
-      android:pathData="M136,360h10v10h-10z"
-      android:fillColor="#F97316"
-      android:fillAlpha="0.4"/>
-  <path
-      android:pathData="M396,340h5v5h-5z"
-      android:fillColor="#8B5CF6"
-      android:fillAlpha="0.5"/>
-  <path
-      android:pathData="M86,290h7v7h-7z"
-      android:fillColor="#FBBF24"
-      android:fillAlpha="0.4"/>
 </vector>
