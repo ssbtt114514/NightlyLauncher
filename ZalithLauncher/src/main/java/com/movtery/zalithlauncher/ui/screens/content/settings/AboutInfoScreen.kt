@@ -142,7 +142,7 @@ fun AboutInfoScreen(
             // 鸣谢板块
             animatedItem(scope) { yOffset ->
                 ChunkLayout(
-                    modifier = Modifier.offset { IntOffset(x = 0, y: yOffset.roundToPx()) },
+                    modifier = Modifier.offset { IntOffset(x = 0, y = yOffset.roundToPx()) },
                     title = stringResource(R.string.about_acknowledgements_title)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
