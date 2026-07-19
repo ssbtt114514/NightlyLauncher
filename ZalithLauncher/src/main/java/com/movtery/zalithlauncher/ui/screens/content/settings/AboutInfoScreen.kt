@@ -124,7 +124,7 @@ fun AboutInfoScreen(
 
                         // 作者信息卡片
                         ButtonIconItem(
-                            icon = painterResource(R.drawable.img_avatar_movtery),
+                            icon = painterResource(R.drawable.img_avatar_ssbtt),
                             title = stringResource(R.string.about_author_ssbtt_title),
                             text = stringResource(R.string.about_launcher_author_movtery_text, "Nightly Launcher"),
                             button = {
