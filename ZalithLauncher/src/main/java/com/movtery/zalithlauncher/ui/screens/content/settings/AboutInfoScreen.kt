@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
-import com.movtery.zalithlauncher.BuildConfig
 import com.movtery.zalithlauncher.BuildKeys
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.plugin.ApkPlugin
@@ -65,7 +64,6 @@ import com.movtery.zalithlauncher.library.libraryData
 import com.movtery.zalithlauncher.path.URL_COMMUNITY
 import com.movtery.zalithlauncher.path.URL_MCMOD
 import com.movtery.zalithlauncher.path.URL_PROJECT
-import com.movtery.zalithlauncher.path.URL_SUPPORT
 import com.movtery.zalithlauncher.path.URL_WEBLATE
 import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.components.AnimatedLazyColumn
@@ -83,7 +81,6 @@ fun AboutInfoScreen(
     key: NestedNavKey.Settings,
     settingsScreenKey: TitledNavKey?,
     mainScreenKey: TitledNavKey?,
-    checkUpdate: () -> Unit,
     openLicense: (raw: Int) -> Unit,
     openLink: (url: String) -> Unit
 ) {
@@ -99,19 +96,15 @@ fun AboutInfoScreen(
             animatedItem(scope) { yOffset ->
                 ChunkLayout(
                     modifier = Modifier.offset { IntOffset(x = 0, y = yOffset.roundToPx()) },
-                    title = stringResource(R.string.about_launcher_title)
+                    title = stringResource(R.string.about_acknowledgements_title)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        // 本项目信息卡片
                         ButtonIconItem(
                             icon = painterResource(R.drawable.img_launcher),
-                            title = BuildKeys.LAUNCHER_NAME,
-                            text = stringResource(R.string.about_launcher_version, BuildConfig.VERSION_NAME),
+                            title = "Zalith Launcher2",
+                            text = stringResource(R.string.about_launcher_version),
                             button = {
-                                Button(
-                                    onClick = checkUpdate
-                                ) {
-                                    Text(text = stringResource(R.string.upgrade_title))
-                                }
                                 Button(
                                     onClick = { openLink(URL_PROJECT) }
                                 ) {
@@ -120,28 +113,20 @@ fun AboutInfoScreen(
                             }
                         )
 
+                        // 作者信息卡片
                         ButtonIconItem(
                             icon = painterResource(R.drawable.img_avatar_movtery),
-                            title = stringResource(R.string.about_launcher_author_movtery_title),
-                            text = stringResource(R.string.about_launcher_author_movtery_text, BuildKeys.LAUNCHER_NAME),
+                            title = stringResource(R.string.about_author_ssbtt_title),
+                            text = stringResource(R.string.about_launcher_author_movtery_text, "Zalith Launcher2"),
                             button = {
                                 Button(
-                                    onClick = { openLink(URL_SUPPORT) }
+                                    onClick = { openLink("https://github.com/ssbtt114514/") }
                                 ) {
-                                    Text(text = stringResource(R.string.about_sponsor))
+                                    Text(text = stringResource(R.string.about_about_me))
                                 }
                             }
                         )
-                    }
-                }
-            }
 
-            animatedItem(scope) { yOffset ->
-                ChunkLayout(
-                    modifier = Modifier.offset { IntOffset(x = 0, y = yOffset.roundToPx()) },
-                    title = stringResource(R.string.about_acknowledgements_title)
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         ButtonIconItem(
                             icon = painterResource(R.drawable.img_avatar_bangbang93),
                             title = "bangbang93",
