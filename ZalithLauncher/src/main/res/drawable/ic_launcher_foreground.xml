@@ -20,7 +20,6 @@
       android:fillColor="#00000000"
       android:strokeColor="#8B5CF6"
       android:strokeWidth="3"
-      android:strokeDasharray="10 16"
       android:strokeAlpha="0.5"/>
 
   <!-- 外层轨道环 -->
@@ -29,7 +28,6 @@
       android:fillColor="#00000000"
       android:strokeColor="#F97316"
       android:strokeWidth="1.5"
-      android:strokeDasharray="6 24"
       android:strokeAlpha="0.3"/>
 
   <!-- 月牙（Nightly 夜晚意象） -->
