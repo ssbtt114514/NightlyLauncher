@@ -34,6 +34,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.movtery.zalithlauncher.game.download.assets.downloadSingleForVersions
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformClasses
+import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.game.version.saves.unpackSaveZip
 import com.movtery.zalithlauncher.ui.screens.NestedNavKey
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
@@ -72,15 +73,20 @@ fun DownloadSavesScreen(
 
     val context = LocalContext.current
 
+    // 从实例管理跳转时携带的版本优先，否则使用当前选中的版本
+    val effectiveVersion = key.version ?: VersionsManager.currentVersion.value
+
     //下载资源操作
     var operation by remember { mutableStateOf<DownloadSingleOperation>(DownloadSingleOperation.None) }
     DownloadSingleOperation(
         operation = operation,
         changeOperation = { operation = it },
-        doInstall = { classes, version, versions ->
+        gameVersion = effectiveVersion,
+        doInstall = { classes, version, _ ->
+            val targetVersions = effectiveVersion?.let { listOf(it) } ?: return@DownloadSingleOperation
             downloadSingleForVersions(
                 version = version,
-                versions = versions,
+                versions = targetVersions,
                 folder = classes.versionFolder.folderName,
                 onFileCopied = { file, folder ->
                     unpackSaveZip(
@@ -104,9 +110,10 @@ fun DownloadSavesScreen(
             )
         },
         onQuickDownloadStart = { info ->
+            val targetVersions = effectiveVersion?.let { listOf(it) } ?: info.gameVersions
             downloadSingleForVersions(
                 version = info.targetVersion,
-                versions = info.gameVersions,
+                versions = targetVersions,
                 folder = info.classes.versionFolder.folderName,
                 onFileCopied = { file, folder ->
                     unpackSaveZip(
@@ -126,7 +133,7 @@ fun DownloadSavesScreen(
             info.dependencyVersions.forEach { depVersion ->
                 downloadSingleForVersions(
                     version = depVersion,
-                    versions = info.gameVersions,
+                    versions = targetVersions,
                     folder = info.classes.versionFolder.folderName,
                     submitError = submitError
                 )
@@ -160,7 +167,12 @@ fun DownloadSavesScreen(
                             )
                         },
                         onQuickDownload = { platform, projectId, classes ->
-                            operation = DownloadSingleOperation.QuickDownload(platform, projectId, classes)
+                            operation = DownloadSingleOperation.QuickDownload(
+                                platform = platform,
+                                projectId = projectId,
+                                classes = classes,
+                                gameVersion = effectiveVersion
+                            )
                         }
                     )
                 }

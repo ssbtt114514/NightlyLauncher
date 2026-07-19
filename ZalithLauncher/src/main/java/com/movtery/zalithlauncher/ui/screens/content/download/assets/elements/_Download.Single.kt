@@ -106,7 +106,9 @@ sealed interface DownloadSingleOperation {
     data class QuickDownload(
         val platform: Platform,
         val projectId: String,
-        val classes: PlatformClasses
+        val classes: PlatformClasses,
+        /** 指定下载目标实例；优先于 [VersionsManager.currentVersion] */
+        val gameVersion: Version? = null
     ) : DownloadSingleOperation
 }
 
@@ -114,6 +116,7 @@ sealed interface DownloadSingleOperation {
 fun DownloadSingleOperation(
     operation: DownloadSingleOperation,
     changeOperation: (DownloadSingleOperation) -> Unit,
+    gameVersion: Version? = null,
     doInstall: (PlatformClasses, PlatformVersion, List<Version>) -> Unit,
     onDependencyClicked: (PlatformVersion.PlatformDependency, PlatformClasses) -> Unit = { _, _ -> },
     onQuickDownloadStart: (QuickDownloadInfo) -> Unit = {}
@@ -146,6 +149,7 @@ fun DownloadSingleOperation(
             DownloadDialog(
                 dependencyProjects = dependencyProjects,
                 classes = classes,
+                gameVersion = gameVersion,
                 onDismiss = {
                     changeOperation(DownloadSingleOperation.None)
                 },
@@ -167,6 +171,7 @@ fun DownloadSingleOperation(
                 platform = operation.platform,
                 projectId = operation.projectId,
                 classes = operation.classes,
+                gameVersion = operation.gameVersion ?: gameVersion,
                 onDismiss = {
                     changeOperation(DownloadSingleOperation.None)
                 },
@@ -193,13 +198,14 @@ private fun rememberValidVersions(): State<List<Version>> {
 private fun DownloadDialog(
     dependencyProjects: List<Pair<PlatformVersion.PlatformDependency, PlatformProject>>,
     classes: PlatformClasses,
+    gameVersion: Version?,
     onDismiss: () -> Unit,
     onInstall: (List<Version>) -> Unit,
     onDependencyClicked: (PlatformVersion.PlatformDependency, PlatformClasses) -> Unit
 ) {
     val versions by rememberValidVersions()
-    val version by VersionsManager.currentVersion.collectAsStateWithLifecycle()
-    val version0 = version
+    val currentVersion by VersionsManager.currentVersion.collectAsStateWithLifecycle()
+    val version0 = gameVersion ?: currentVersion
 
     if (version0 == null || versions.isEmpty()) {
         SimpleAlertDialog(

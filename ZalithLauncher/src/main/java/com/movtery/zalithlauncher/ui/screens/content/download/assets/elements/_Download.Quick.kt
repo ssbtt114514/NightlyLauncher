@@ -169,11 +169,21 @@ data class CompatibilityFailure(
 /** 着色器模组检测结果缓存，key = 实例游戏目录路径，防止重复检测 */
 private val shaderCheckCache = mutableMapOf<String, Boolean>()
 
+/**
+ * 清除指定实例的光影加载器检测缓存。
+ * 在每次打开光影下载界面时调用，确保该实例首次下载光影时重新扫描。
+ */
+internal fun clearShaderCheckCacheFor(version: Version?) {
+    version?.getGameDir()?.absolutePath?.let { shaderCheckCache.remove(it) }
+}
+
 private class QuickDownloadViewModel(
     private val platform: Platform,
     private val projectId: String,
     private val classes: PlatformClasses,
-    private val reasonProvider: FailureReasonProvider
+    private val reasonProvider: FailureReasonProvider,
+    /** 指定下载目标实例；优先于 [VersionsManager.currentVersion] */
+    private val gameVersion: Version? = null
 ) : ViewModel() {
     var state by mutableStateOf<QuickDownloadState>(QuickDownloadState.Loading)
         private set
@@ -187,7 +197,7 @@ private class QuickDownloadViewModel(
             state = QuickDownloadState.Loading
             processedProjects.clear()
 
-            val gameVersion = VersionsManager.currentVersion.value ?: run {
+            val gameVersion = this.gameVersion ?: VersionsManager.currentVersion.value ?: run {
                 state = QuickDownloadState.NoGameVersion
                 return@launch
             }
@@ -556,6 +566,8 @@ fun QuickDownloadDialog(
     platform: Platform,
     projectId: String,
     classes: PlatformClasses,
+    /** 指定下载目标实例；优先于 [VersionsManager.currentVersion] */
+    gameVersion: Version? = null,
     onDismiss: () -> Unit,
     onDownload: (QuickDownloadInfo) -> Unit
 ) {
@@ -563,9 +575,9 @@ fun QuickDownloadDialog(
     val reasonProvider = remember { FailureReasonProvider(context) }
 
     val viewModel = viewModel(
-        key = "$platform|$projectId|$classes"
+        key = "$platform|$projectId|$classes|$gameVersion"
     ) {
-        QuickDownloadViewModel(platform, projectId, classes, reasonProvider)
+        QuickDownloadViewModel(platform, projectId, classes, reasonProvider, gameVersion)
     }
 
     LaunchedEffect(Unit) {
@@ -724,7 +736,7 @@ fun QuickDownloadDialog(
                                 Button(
                                     modifier = Modifier.weight(0.5f),
                                     onClick = {
-                                        val gameVersion = VersionsManager.currentVersion.value ?: return@Button
+                                        val gameVersion = gameVersion ?: VersionsManager.currentVersion.value ?: return@Button
                                         val gameVersions = listOf(gameVersion)
 
                                         onDownload(

@@ -89,7 +89,8 @@ sealed interface NestedNavKey {
         }
     }
     /** 下载模组屏幕 */
-    @Serializable class DownloadMod : BackStackNavKey<TitledNavKey>(
+    @Serializable
+    class DownloadMod(@Contextual val version: Version? = null) : BackStackNavKey<TitledNavKey>(
         androidText(R.string.download_category_mod)
     ) {
         init {
@@ -97,7 +98,8 @@ sealed interface NestedNavKey {
         }
     }
     /** 下载资源包屏幕 */
-    @Serializable class DownloadResourcePack : BackStackNavKey<TitledNavKey>(
+    @Serializable
+    class DownloadResourcePack(@Contextual val version: Version? = null) : BackStackNavKey<TitledNavKey>(
         androidText(R.string.download_category_resource_pack)
     ) {
         init {
@@ -105,7 +107,8 @@ sealed interface NestedNavKey {
         }
     }
     /** 下载存档屏幕 */
-    @Serializable class DownloadSaves : BackStackNavKey<TitledNavKey>(
+    @Serializable
+    class DownloadSaves(@Contextual val version: Version? = null) : BackStackNavKey<TitledNavKey>(
         androidText(R.string.download_category_saves)
     ) {
         init {
@@ -113,7 +116,8 @@ sealed interface NestedNavKey {
         }
     }
     /** 下载光影包屏幕 */
-    @Serializable class DownloadShaders : BackStackNavKey<TitledNavKey>(
+    @Serializable
+    class DownloadShaders(@Contextual val version: Version? = null) : BackStackNavKey<TitledNavKey>(
         androidText(R.string.download_category_shaders)
     ) {
         init {

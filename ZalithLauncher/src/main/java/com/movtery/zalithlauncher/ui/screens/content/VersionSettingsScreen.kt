@@ -452,7 +452,7 @@ private fun NavigationUI(
                         backToMainScreen = backToMainScreen,
                         swapToDownload = {
                             backScreenViewModel.navigateToDownload(
-                                targetScreen = backScreenViewModel.downloadModScreen
+                                targetScreen = NestedNavKey.DownloadMod(key.version)
                             )
                         },
                         onSwapMoreInfo = { projectId, platform ->
@@ -473,7 +473,7 @@ private fun NavigationUI(
                         backToMainScreen = backToMainScreen,
                         swapToDownload = {
                             backScreenViewModel.navigateToDownload(
-                                targetScreen = backScreenViewModel.downloadSavesScreen
+                                targetScreen = NestedNavKey.DownloadSaves(key.version)
                             )
                         },
                         onQuickPlay = { version, saveName ->
@@ -495,7 +495,7 @@ private fun NavigationUI(
                         backToMainScreen = backToMainScreen,
                         swapToDownload =  {
                             backScreenViewModel.navigateToDownload(
-                                targetScreen = backScreenViewModel.downloadResourcePackScreen
+                                targetScreen = NestedNavKey.DownloadResourcePack(key.version)
                             )
                         },
                         submitError = submitError
@@ -509,7 +509,7 @@ private fun NavigationUI(
                         backToMainScreen = backToMainScreen,
                         swapToDownload = {
                             backScreenViewModel.navigateToDownload(
-                                targetScreen = backScreenViewModel.downloadShadersScreen
+                                targetScreen = NestedNavKey.DownloadShaders(key.version)
                             )
                         },
                         submitError = submitError
