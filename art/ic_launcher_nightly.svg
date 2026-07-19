@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Firefox Nightly 标志性深蓝紫渐变背景 -->
+    <radialGradient id="bgGrad" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#2B1B4D"/>
+      <stop offset="50%" stop-color="#1A0F2E"/>
+      <stop offset="100%" stop-color="#0B0712"/>
+    </radialGradient>
+    
+    <!-- 火焰渐变（紫→蓝→橙，Nightly 专属） -->
+    <linearGradient id="flameGrad" x1="30%" y1="80%" x2="70%" y2="10%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="40%" stop-color="#6366F1"/>
+      <stop offset="70%" stop-color="#06B6D4"/>
+      <stop offset="100%" stop-color="#F97316"/>
+    </linearGradient>
+    
+    <!-- 内部光晕（增强深邃感） -->
+    <radialGradient id="innerGlow" cx="45%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- 圆形背景 -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  
+  <!-- 内部光晕层 -->
+  <rect width="512" height="512" rx="112" fill="url(#innerGlow)"/>
+  
+  <!-- ===== 核心图标：抽象 N + 火焰 / 月牙组合 ===== -->
+  <g transform="translate(256, 260)">
+    <!-- 轨道环（不稳定的象征） -->
+    <ellipse cx="0" cy="0" rx="140" ry="140" fill="none" stroke="#8B5CF6" stroke-width="3" stroke-dasharray="10 16" opacity="0.5"/>
+    <ellipse cx="0" cy="0" rx="170" ry="170" fill="none" stroke="#F97316" stroke-width="1.5" stroke-dasharray="6 24" opacity="0.3"/>
+    
+    <!-- 月牙（Nightly 夜晚意象） -->
+    <path d="M -40 -110 A 110 110 0 1 0 100 40 A 85 85 0 1 1 -40 -110 Z" 
+          fill="url(#flameGrad)" />
+    
+    <!-- 中心 N 字（Nightly 首字母，用火焰渐变色） -->
+    <text x="0" y="30" text-anchor="middle" font-family="'Segoe UI','Arial Black',sans-serif" 
+          font-weight="900" font-size="120" fill="url(#flameGrad)" 
+          letter-spacing="-8">
+      N
+    </text>
+    
+    <!-- 右上角“不稳定”脉冲点（橙红色） -->
+    <circle cx="100" cy="-140" r="14" fill="#F97316">
+      <animate attributeName="opacity" values="1;0.2;1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="100" cy="-140" r="20" fill="#F97316" opacity="0.3">
+      <animate attributeName="r" values="20;30;20" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- 散落的小星点（像素风点缀） -->
+    <rect x="-150" y="-100" width="8" height="8" fill="#8B5CF6" opacity="0.6" rx="2"/>
+    <rect x="130" y="-60" width="6" height="6" fill="#06B6D4" opacity="0.5" rx="1"/>
+    <rect x="-120" y="100" width="10" height="10" fill="#F97316" opacity="0.4" rx="2"/>
+    <rect x="140" y="80" width="5" height="5" fill="#8B5CF6" opacity="0.5" rx="1"/>
+    <rect x="-170" y="30" width="7" height="7" fill="#FBBF24" opacity="0.4" rx="1"/>
+  </g>
+</svg>
