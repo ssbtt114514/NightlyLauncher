@@ -50,8 +50,9 @@ android {
     compileSdk = 37
 
     signingConfigs {
+        val releaseKeystore = file("zalith_night.jks")
         create("releaseBuild") {
-            storeFile = file("zalith_night.jks")
+            storeFile = releaseKeystore
             storePassword = defaultStorePassword
             keyAlias = "ssbtt_nightly"
             keyPassword = defaultKeyPassword
@@ -77,7 +78,8 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("releaseBuild")
+            signingConfig = signingConfigs.getByName("releaseBuild").takeIf { it.storeFile?.exists() == true }
+                ?: signingConfigs.getByName("debugBuild")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
