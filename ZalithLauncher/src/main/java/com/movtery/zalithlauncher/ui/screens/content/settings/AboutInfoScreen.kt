@@ -126,7 +126,7 @@ fun AboutInfoScreen(
                         ButtonIconItem(
                             icon = painterResource(R.drawable.img_avatar_ssbtt),
                             title = stringResource(R.string.about_author_ssbtt_title),
-                            text = stringResource(R.string.about_launcher_author_movtery_text, "Nightly Launcher"),
+                            text = stringResource(R.string.about_launcher_author_movtery_text, "Zalith Launcher2"),
                             button = {
                                 Button(
                                     onClick = { openLink("https://ssbtt114514.github.io/") }
@@ -159,16 +159,23 @@ fun AboutInfoScreen(
                             }
                         )
                         ButtonIconItem(
-                            icon = painterResource(R.drawable.img_avatar_bangbang93),
-                            title = "bangbang93",
-                            text = stringResource(R.string.about_acknowledgements_bangbang93_text, BuildKeys.LAUNCHER_SHORT_NAME),
+                            icon = painterResource(R.drawable.img_avatar_mcim),
+                            title = "mcmod-info-mirror",
+                            text = stringResource(R.string.about_acknowledgements_mcim_text, BuildKeys.LAUNCHER_SHORT_NAME),
                             button = {
                                 Button(
-                                    onClick = { openLink("https://ifdian.net/a/bangbang93") }
+                                    onClick = { openLink("https://www.mcimirror.top/sponsor") }
                                 ) {
                                     Text(text = stringResource(R.string.about_sponsor))
                                 }
                             }
+                        )
+                        LinkIconItem(
+                            icon = painterResource(R.drawable.ic_github),
+                            title = stringResource(R.string.about_acknowledgements_zalith),
+                            text = stringResource(R.string.about_acknowledgements_zalith_text),
+                            openLink = { openLink("https://github.com/ZalithLauncher/ZalithLauncher2") },
+                            useImage = false
                         )
                         LinkIconItem(
                             icon = painterResource(R.drawable.img_launcher_fcl),
