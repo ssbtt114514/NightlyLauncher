@@ -26,18 +26,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.movtery.zalithlauncher.BuildConfig
 import com.movtery.zalithlauncher.path.GLOBAL_CLIENT
-import com.movtery.zalithlauncher.path.GLOBAL_JSON
 import com.movtery.zalithlauncher.path.URL_PROJECT_INFO
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.upgrade.UpgradeDialog
 import com.movtery.zalithlauncher.ui.upgrade.UpgradeFilesDialog
-import com.movtery.zalithlauncher.upgrade.GithubContentApi
+import com.movtery.zalithlauncher.upgrade.GitHubRelease
 import com.movtery.zalithlauncher.upgrade.RemoteData
 import com.movtery.zalithlauncher.upgrade.TooFrequentOperationException
+import com.movtery.zalithlauncher.upgrade.toRemoteData
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.safeBodyAsJson
 import com.movtery.zalithlauncher.utils.network.withRetry
-import com.movtery.zalithlauncher.utils.string.decodeBase64
 import io.ktor.client.request.get
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -55,12 +54,6 @@ sealed interface LauncherUpgradeOperation {
     /** 选择要安装的安装包文件 */
     data class SelectApk(val data: RemoteData) : LauncherUpgradeOperation
 }
-
-/**
- * 最新版本的信息获取源
- */
-private const val LATEST_VERSION = "latest_version_md.json"
-private const val LATEST_API_URL = "$URL_PROJECT_INFO/$LATEST_VERSION"
 
 /**
  * 用于记录启动器更新 ViewModel
@@ -171,11 +164,8 @@ class LauncherUpgradeViewModel: ViewModel() {
         return withContext(Dispatchers.IO) {
             runCatching {
                 withRetry(logTag = "LauncherUpgrade", maxRetries = 2) {
-                    //获取最新的启动器信息
-                    val api = GLOBAL_CLIENT.get(LATEST_API_URL).safeBodyAsJson<GithubContentApi>()
-                    //需要Base64解密
-                    val contentString = decodeBase64(api.content)
-                    GLOBAL_JSON.decodeFromString(RemoteData.serializer(), contentString)
+                    //直接请求 GitHub Releases API
+                    GLOBAL_CLIENT.get(URL_PROJECT_INFO).safeBodyAsJson<GitHubRelease>().toRemoteData()
                 }
             }.getOrElse { e ->
                 Logger.warning(TAG, "Failed to check for launcher upgrade!", e)
